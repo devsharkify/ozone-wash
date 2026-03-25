@@ -1,0 +1,6 @@
+json{
+  "name": "ozonewash-preview",
+  "scripts": {
+    "start": "npx serve . -p $PORT"
+  }
+}
