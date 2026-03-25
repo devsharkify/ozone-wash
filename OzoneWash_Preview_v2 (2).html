@@ -1,0 +1,2821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ozone Wash App</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --T:#00C4A0;    /* primary teal */
+  --T2:#00E5BC;   /* light teal */
+  --T3:#007A64;   /* dark teal */
+  --B:#1E90D4;    /* logo blue */
+  --G:#2DB34A;    /* logo green */
+  --N:#1A2A4A;    /* navy */
+  --bg:#071A1F;   /* dark bg */
+  --s1:#0C2229;   /* surface 1 */
+  --s2:#0F2C35;   /* surface 2 */
+  --s3:#133540;   /* surface 3 */
+  --e1:rgba(0,196,160,.08);
+  --e2:rgba(0,196,160,.15);
+  --gold:#F0B429;--red:#EF4444;--mint:#22C55E;
+  --txt:#E0F7F4;--txt2:#7ABFB5;--txt3:#3D7A72;
+}
+body{background:#1a2a2e;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Outfit',sans-serif;}
+.phone-wrap{position:relative;width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 0 1px rgba(0,196,160,.1),inset 0 0 0 1px rgba(0,196,160,.05);contain:strict;}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;background:var(--bg);display:none;scrollbar-width:none;}
+.screen::-webkit-scrollbar{display:none;}
+.screen.active{display:flex;flex-direction:column;z-index:10;}
+.screen.slide-in{animation:slideIn 280ms cubic-bezier(0.16,1,0.3,1) forwards;}
+@keyframes slideIn{from{transform:translateX(100%) scale(.97);opacity:.5}to{transform:translateX(0) scale(1);opacity:1}}
+
+/* LOGO SVG - the actual OzoneWash logo */
+.ow-logo{display:inline-block;}
+
+/* TYPOGRAPHY */
+.mono{font-family:'JetBrains Mono',monospace;}
+h1{font-size:28px;font-weight:800;color:var(--txt);line-height:1.15;}
+h2{font-size:22px;font-weight:700;color:var(--txt);}
+h3{font-size:16px;font-weight:600;color:var(--txt);}
+p{font-size:14px;color:var(--txt2);line-height:1.6;}
+
+/* BUTTONS */
+.btn-primary{background:linear-gradient(135deg,var(--T),var(--T2));color:#071A1F;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;border:none;border-radius:20px;height:56px;width:100%;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 32px rgba(0,196,160,.35);}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{background:var(--s2);color:var(--txt);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;border:1px solid var(--e2);border-radius:16px;height:52px;width:100%;cursor:pointer;}
+.btn-blue{background:linear-gradient(135deg,#1E90D4,#1260A8);color:#fff;font-family:'Outfit',sans-serif;font-size:16px;font-weight:800;border:none;border-radius:20px;height:56px;width:100%;cursor:pointer;box-shadow:0 8px 24px rgba(30,144,212,.3);}
+
+/* CARDS */
+.card{background:var(--s1);border-radius:20px;border:1px solid var(--e1);position:relative;overflow:hidden;}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,196,160,.2),transparent);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;}
+.chip.teal{background:rgba(0,196,160,.12);border:1px solid rgba(0,196,160,.25);color:var(--T);}
+.chip.blue{background:rgba(30,144,212,.12);border:1px solid rgba(30,144,212,.25);color:var(--B);}
+.chip.green{background:rgba(45,179,74,.12);border:1px solid rgba(45,179,74,.25);color:var(--G);}
+.chip.gold{background:rgba(240,180,41,.12);border:1px solid rgba(240,180,41,.25);color:var(--gold);}
+.chip.red{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:var(--red);}
+
+.topbar{display:flex;align-items:center;gap:12px;padding:54px 24px 16px;flex-shrink:0;}
+.back-btn{width:40px;height:40px;border-radius:12px;background:var(--s2);border:1px solid var(--e1);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.back-btn:active{transform:scale(.9);}
+.progress-bar{height:3px;background:var(--s2);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--T3),var(--T));border-radius:2px;box-shadow:0 0 8px rgba(0,196,160,.4);transition:width .5s cubic-bezier(0.4,0,0.2,1);}
+
+/* BOTTOM NAV */
+.bottom-nav{display:flex;align-items:center;background:rgba(7,26,31,.9);backdrop-filter:blur(24px);border-top:1px solid var(--e1);padding:8px 8px 28px;flex-shrink:0;z-index:10;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 0;transition:transform .2s;}
+.nav-item.active{transform:translateY(-3px);}
+.nav-icon{width:44px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.nav-item.active .nav-icon{background:rgba(0,196,160,.15);box-shadow:0 0 16px rgba(0,196,160,.2);}
+.nav-item span{font-size:11px;font-weight:600;color:var(--txt3);}
+.nav-item.active span{color:var(--T);}
+
+/* FAB */
+.fab{position:absolute;bottom:92px;right:24px;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--T),var(--T2));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 28px rgba(0,196,160,.45);animation:fabBob 3s ease-in-out infinite;z-index:10;}
+@keyframes fabBob{0%,100%{transform:translateY(-18px)}50%{transform:translateY(-22px)}}
+.fab:active{animation:none;transform:rotate(45deg);}
+
+/* ANIMATIONS */
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.8);opacity:0}}
+@keyframes ripple{0%{transform:scale(.3);opacity:.8}100%{transform:scale(2.5);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bellWobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}75%{transform:rotate(-6deg)}}
+@keyframes successRing{0%{transform:scale(0.3);opacity:0}70%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes ecoNum{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes progressFill{from{width:0}}
+@keyframes conicSpin{to{transform:rotate(360deg)}}
+@keyframes waterRipple{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.2);opacity:0}}
+
+.scroll-content{flex:1;overflow-y:auto;scrollbar-width:none;}
+.scroll-content::-webkit-scrollbar{display:none;}
+.section-label{font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1.5px;padding:16px 24px 8px;}
+
+/* ROLE TOGGLE */
+.role-toggle{position:absolute;top:16px;right:16px;background:rgba(0,196,160,.1);border:1px solid rgba(0,196,160,.25);border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--T);cursor:pointer;z-index:100;}
+
+/* ===== SPLASH ===== */
+#splash{background:radial-gradient(ellipse at 50% 30%,#0d2f35 0%,#071A1F 70%);}
+.splash-glow{position:absolute;top:32%;left:50%;transform:translate(-50%,-50%);width:280px;height:280px;background:radial-gradient(circle,rgba(0,196,160,.15) 0%,transparent 65%);}
+.splash-water-rings{position:absolute;top:32%;left:50%;transform:translate(-50%,-50%);}
+.splash-water-rings span{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;border-radius:50%;border:1px solid rgba(0,196,160,.15);}
+.splash-water-rings span:nth-child(1){animation:waterRipple 3s ease-out .0s infinite;}
+.splash-water-rings span:nth-child(2){animation:waterRipple 3s ease-out .8s infinite;}
+.splash-water-rings span:nth-child(3){animation:waterRipple 3s ease-out 1.6s infinite;}
+
+/* TRUST BADGES */
+.trust-row{display:flex;justify-content:center;gap:16px;padding:0 24px;}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:rgba(0,196,160,.7);}
+.trust-sep{color:rgba(0,196,160,.2);font-size:18px;}
+
+/* BOOKING */
+.bk-footer{padding:16px 24px 32px;background:var(--bg);border-top:1px solid var(--e1);flex-shrink:0;}
+.tank-option{background:var(--s1);border:2px solid var(--e1);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;margin-bottom:10px;}
+.tank-option.sel{border-color:var(--T);background:rgba(0,196,160,.06);}
+.tank-option .radio{width:20px;height:20px;border-radius:10px;border:2px solid var(--txt3);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tank-option.sel .radio{border-color:var(--T);}
+.tank-option.sel .radio::after{content:'';width:10px;height:10px;border-radius:5px;background:var(--T);}
+.size-chip{padding:10px 18px;border-radius:24px;background:var(--s2);border:2px solid var(--e1);font-size:14px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .2s;font-family:'JetBrains Mono',monospace;}
+.size-chip.sel{background:rgba(0,196,160,.1);border-color:var(--T);color:var(--T);}
+.date-chip{min-width:54px;padding:12px 6px;border-radius:14px;background:var(--s2);border:2px solid var(--e1);text-align:center;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.date-chip.sel{background:rgba(0,196,160,.1);border-color:var(--T);}
+.date-chip .day{font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;}
+.date-chip .num{font-size:20px;font-weight:800;color:var(--txt);font-family:'JetBrains Mono',monospace;}
+.date-chip.sel .day{color:rgba(0,196,160,.6);}
+.date-chip.sel .num{color:var(--T);}
+.slot-chip{padding:10px 4px;border-radius:12px;background:var(--s2);border:2px solid var(--e1);text-align:center;cursor:pointer;transition:all .2s;}
+.slot-chip span{font-size:11px;font-weight:600;color:var(--txt2);font-family:'JetBrains Mono',monospace;}
+.slot-chip.sel{background:rgba(0,196,160,.1);border-color:var(--T);}
+.slot-chip.sel span{color:var(--T);}
+.addon-item{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--e1);}
+.checkbox{width:24px;height:24px;border-radius:8px;border:2px solid var(--txt3);background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.checkbox.on{background:var(--T);border-color:var(--T);}
+.pay-card{background:var(--s2);border:2px solid var(--e1);border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+.pay-card.sel{border-color:var(--T);background:rgba(0,196,160,.06);}
+.review-table{margin:0 24px 16px;background:var(--s1);border-radius:16px;border:1px solid var(--e1);overflow:hidden;}
+.rt-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--e1);}
+.rt-row:last-child{border-bottom:none;}
+
+/* CERT */
+.cert-card{margin:16px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.cert-header{background:var(--N);padding:20px 24px;display:flex;align-items:center;gap:14px;}
+
+/* TRACK */
+.map-mock{margin:0 16px;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#081c24,#0d2832);height:220px;position:relative;border:1px solid var(--e2);}
+.map-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(0,196,160,.04) 0px,rgba(0,196,160,.04) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(0,196,160,.04) 0px,rgba(0,196,160,.04) 1px,transparent 1px,transparent 40px);}
+.map-route{position:absolute;top:40%;left:18%;width:64%;height:2px;background:linear-gradient(90deg,var(--G),var(--T));border-radius:2px;filter:drop-shadow(0 0 5px var(--T));}
+.agent-pin{position:absolute;top:calc(40% - 12px);left:calc(18% - 12px);width:24px;height:24px;border-radius:50%;background:var(--G);box-shadow:0 0 16px rgba(45,179,74,.6);}
+.agent-pin::before,.agent-pin::after{content:'';position:absolute;border-radius:50%;border:2px solid rgba(45,179,74,.4);animation:pulse 1.5s ease-out infinite;}
+.agent-pin::before{inset:-7px;animation-delay:.3s;}
+.agent-pin::after{inset:-14px;animation-delay:.7s;}
+.dest-pin{position:absolute;top:calc(40% - 10px);right:16%;width:20px;height:20px;border-radius:50%;background:var(--T);box-shadow:0 0 12px rgba(0,196,160,.6);}
+
+/* FIELD */
+.job-card{background:var(--s1);border-radius:20px;border:1px solid var(--e1);margin:0 16px 12px;overflow:hidden;cursor:pointer;transition:transform .2s;}
+.job-card:active{transform:scale(.98);}
+.jbar{height:4px;}
+.checklist-step{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--e1);cursor:pointer;}
+.step-chk{width:32px;height:32px;border-radius:10px;border:2px solid var(--e2);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--s2);font-size:13px;font-weight:700;color:var(--txt3);transition:all .25s;}
+.step-chk.done{background:rgba(0,196,160,.12);border-color:var(--T);color:var(--T);}
+.otp-box{background:linear-gradient(135deg,var(--s1),var(--s2));border:2px solid var(--T);border-radius:24px;padding:32px;text-align:center;margin:16px 24px;}
+.otp-code{font-family:'JetBrains Mono',monospace;font-size:54px;font-weight:600;color:var(--T);letter-spacing:10px;text-shadow:0 0 30px rgba(0,196,160,.4);}
+.stat-pill{flex:1;background:rgba(0,196,160,.06);border:1px solid rgba(0,196,160,.15);border-radius:12px;padding:10px 6px;text-align:center;}
+.sev-btn{flex:1;padding:11px 8px;border-radius:12px;border:2px solid var(--e1);text-align:center;cursor:pointer;transition:all .2s;font-size:13px;font-weight:700;color:var(--txt2);}
+.sev-btn.low.on{background:rgba(0,196,160,.12);border-color:var(--T);color:var(--T);}
+.sev-btn.hi.on{background:rgba(240,180,41,.12);border-color:var(--gold);color:var(--gold);}
+.sev-btn.crit.on{background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red);}
+.kpi-card{background:var(--s1);border-radius:16px;border:1px solid var(--e1);padding:16px;}
+.chart-bar{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.bar{width:26px;border-radius:5px 5px 0 0;min-height:4px;}
+
+/* NOTIF */
+.notif-item{display:flex;gap:14px;padding:14px 20px;border-bottom:1px solid var(--e1);cursor:pointer;position:relative;}
+.notif-item.unread::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:3px;background:var(--T);border-radius:0 2px 2px 0;}
+
+/* SUCCESS */
+.success-ring{width:100px;height:100px;border-radius:50%;background:rgba(0,196,160,.12);display:flex;align-items:center;justify-content:center;animation:successRing .6s cubic-bezier(0.175,0.885,0.32,1.275) both;margin:0 auto 20px;}
+
+/* ONBOARDING CONIC */
+.ob-conic{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--T),var(--G),var(--T));animation:conicSpin 8s linear infinite;display:flex;align-items:center;justify-content:center;}
+.ob-conic-inner{width:88px;height:88px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.ob-dot{width:8px;height:8px;border-radius:4px;background:var(--s3);transition:all .3s;}
+.ob-dot.active{width:24px;background:var(--T);}
+
+/* HOME ECOSCORE */
+.ecoscore-card{margin:0 16px 14px;background:linear-gradient(135deg,#0a2830 0%,#0d333c 100%);border-radius:24px;border:1px solid rgba(0,196,160,.2);padding:20px;position:relative;overflow:hidden;cursor:pointer;}
+.eco-shimmer{position:absolute;top:0;bottom:0;width:50%;background:linear-gradient(90deg,transparent,rgba(0,196,160,.05),transparent);animation:shimmer 4s 2s ease-in-out infinite;}
+.eco-num{font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:600;color:var(--txt);animation:ecoNum .7s cubic-bezier(0.175,0.885,0.32,1.275) both;}
+.eco-bar{height:6px;background:var(--s3);border-radius:3px;margin-top:10px;overflow:hidden;}
+.eco-fill{height:100%;width:87%;background:linear-gradient(90deg,var(--T3),var(--T),var(--T2));border-radius:3px;animation:progressFill .9s ease-in-out both;}
+
+.live-strip{margin:0 16px 14px;background:var(--s1);border-radius:16px;border:1px solid var(--e1);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--red);position:relative;}
+.live-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(239,68,68,.4);animation:pulse 1.2s ease-out infinite;}
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 16px 14px;}
+.qa{background:var(--s1);border-radius:16px;border:1px solid var(--e1);padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;transition:transform .2s;}
+.qa:active{transform:scale(.95);}
+.qa-ic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;}
+.service-cards{display:flex;gap:12px;padding:0 16px 14px;overflow-x:auto;scrollbar-width:none;}
+.service-card{min-width:190px;background:var(--s1);border-radius:20px;border:1px solid var(--e1);padding:18px;cursor:pointer;position:relative;overflow:hidden;flex-shrink:0;}
+.service-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,196,160,.2),transparent);}
+.amc-strip{margin:0 16px 14px;background:linear-gradient(135deg,rgba(0,196,160,.08),rgba(45,179,74,.05));border:1px solid rgba(0,196,160,.2);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+
+/* CALL */
+.call-avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;color:#071A1F;margin:0 auto;box-shadow:0 0 0 8px rgba(0,196,160,.08),0 0 0 18px rgba(0,196,160,.04);}
+.call-btn{width:72px;height:72px;border-radius:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s;}
+.call-btn:active{transform:scale(.9);}
+/* NUMPAD */
+.numpad-btn{background:var(--s2);border:1px solid var(--e2);border-radius:16px;height:56px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--txt);cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s;user-select:none;}
+.numpad-btn:active{background:rgba(0,196,160,.12);border-color:var(--T);color:var(--T);transform:scale(.94);}
+/* OTP INPUT BOXES (field entry) */
+.otp-input-box{width:62px;height:72px;border-radius:16px;background:var(--s2);border:2px solid var(--e2);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:600;color:var(--txt3);transition:all .2s;}
+.otp-input-box.filled{border-color:var(--T);color:var(--T);background:rgba(0,196,160,.08);}
+/* CUSTOMER OTP DISPLAY */
+.cotp-code{font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:600;color:var(--T);letter-spacing:12px;text-shadow:0 0 28px rgba(0,196,160,.5);animation:otpGlow 2.5s ease-in-out infinite;}
+@keyframes otpGlow{0%,100%{text-shadow:0 0 28px rgba(0,196,160,.5)}50%{text-shadow:0 0 48px rgba(0,196,160,.8)}}
+@keyframes otpGlow2{0%,100%{text-shadow:0 0 28px rgba(45,179,74,.5)}50%{text-shadow:0 0 48px rgba(45,179,74,.9)}}
+/* TRANSFER */
+.t-reason{padding:12px 16px;border-radius:14px;background:var(--s2);border:2px solid var(--e1);font-size:13px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .2s;}
+.t-reason.sel{background:rgba(0,196,160,.08);border-color:var(--T);color:var(--T);}
+.agent-card{background:var(--s1);border:2px solid var(--e1);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;}
+.agent-card.sel{border-color:var(--T);background:rgba(0,196,160,.06);}
+.agent-radio{width:20px;height:20px;border-radius:10px;border:2px solid var(--txt3);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.agent-card.sel .agent-radio{border-color:var(--T);}
+/* CALENDAR */
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;position:relative;transition:all .15s;}
+.cal-day:active{transform:scale(.88);}
+.cal-day .dn{font-size:13px;font-weight:700;color:var(--txt2);line-height:1;}
+.cal-day.today{background:rgba(0,196,160,.08);border:1px solid rgba(0,196,160,.25);}
+.cal-day.today .dn{color:var(--T);}
+.cal-day.selected{background:var(--T);}
+.cal-day.selected .dn{color:#071A1F;font-weight:800;}
+.cal-day.empty{pointer-events:none;opacity:0;}
+.dot-row{display:flex;gap:2px;margin-top:2px;height:4px;}
+.dot{width:4px;height:4px;border-radius:50%;}
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE SHELL ══ -->
+<div id="shell" style="
+  min-height:100vh;
+  background:#07100f;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:32px 24px 60px;
+  font-family:'Outfit',sans-serif;
+">
+
+  <!-- header -->
+  <div style="text-align:center;margin-bottom:22px;">
+    <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(0,196,160,.07);border:1px solid rgba(0,196,160,.18);border-radius:20px;padding:5px 14px;font-size:10px;font-weight:700;color:#00C4A0;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#00C4A0;opacity:.7;"></span>
+      Interactive Prototype
+    </div>
+    <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-0.5px;margin-bottom:4px;">OzoneWash App Preview</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.3);">Tap any screen tab to navigate · Toggle Customer / Field Team</div>
+  </div>
+
+  <!-- role toggle -->
+  <div style="display:flex;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:13px;padding:4px;gap:4px;margin-bottom:18px;">
+    <button id="btnCustomer" onclick="shellSetRole('customer')" style="display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:10px;border:none;background:#00C4A0;color:#071A1F;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="7" r="4"/><path d="M4 21v-2a4 4 0 014-4h8a4 4 0 014 4v2"/></svg>
+      Customer App
+    </button>
+    <button id="btnAgent" onclick="shellSetRole('agent')" style="display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      Field Team App
+    </button>
+    <button id="btnAdmin" onclick="shellSetRole('admin')" style="display:flex;align-items:center;gap:8px;padding:10px 22px;border-radius:10px;border:none;background:transparent;color:rgba(255,255,255,.4);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Admin Panel
+    </button>
+  </div>
+
+  <!-- screen tabs -->
+  <div id="tabsCustomer" style="display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:24px;max-width:680px;">
+    <div class="stab active" onclick="shellGoTo('splash',this)">Splash</div>
+    <div class="stab" onclick="shellGoTo('ob1',this)">Onboard 1</div>
+    <div class="stab" onclick="shellGoTo('ob2',this)">Onboard 2</div>
+    <div class="stab" onclick="shellGoTo('ob3',this)">Onboard 3</div>
+    <div class="stab" onclick="shellGoTo('ob4',this)">Onboard 4</div>
+    <div class="stab" onclick="shellGoTo('home',this)">Home</div>
+    <div class="stab" onclick="shellGoTo('bk1',this)">Tank Type</div>
+    <div class="stab" onclick="shellGoTo('bk2',this)">Date &amp; Time</div>
+    <div class="stab" onclick="shellGoTo('bk3',this)">Add-ons</div>
+    <div class="stab" onclick="shellGoTo('bk4',this)">Review</div>
+    <div class="stab" onclick="shellGoTo('confirmed',this)">Confirmed</div>
+    <div class="stab" onclick="shellGoTo('cert',this)">Certificate</div>
+    <div class="stab" onclick="shellGoTo('track',this)">Track</div>
+    <div class="stab" onclick="shellGoTo('cotp_start',this)">OTP Start</div>
+    <div class="stab" onclick="shellGoTo('cotp_end',this)">OTP End</div>
+    <div class="stab" onclick="shellGoTo('notifs',this)">Notifications</div>
+  </div>
+  <div id="tabsAgent" style="display:none;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:24px;max-width:680px;">
+    <div class="stab active" onclick="shellGoTo('fjobs',this)">Jobs List</div>
+    <div class="stab" onclick="shellGoTo('fdet',this)">Job Detail</div>
+    <div class="stab" onclick="shellGoTo('fotp_start',this)">Start OTP</div>
+    <div class="stab" onclick="shellGoTo('fcl',this)">Checklist</div>
+    <div class="stab" onclick="shellGoTo('fotp_end',this)">End OTP</div>
+    <div class="stab" onclick="shellGoTo('fjob_done',this)">Job Done</div>
+    <div class="stab" onclick="shellGoTo('fincident',this)">Incident</div>
+    <div class="stab" onclick="shellGoTo('fcall',this)">Call Customer</div>
+    <div class="stab" onclick="shellGoTo('ftransfer',this)">Transfer</div>
+    <div class="stab" onclick="shellGoTo('fmis',this)">My Stats</div>
+  </div>
+
+  <div id="tabsAdmin" style="display:none;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:24px;max-width:680px;">
+    <div class="stab active" onclick="adminNav('a-dashboard',this)">Dashboard</div>
+    <div class="stab" onclick="adminNav('a-bookings',this)">Bookings</div>
+    <div class="stab" onclick="adminNav('a-agents',this)">Field Agents</div>
+    <div class="stab" onclick="adminNav('a-support',this)">Support Chat</div>
+    <div class="stab" onclick="adminNav('a-invoices',this)">Invoices</div>
+    <div class="stab" onclick="adminNav('a-amc',this)">AMC</div>
+    <div class="stab" onclick="adminNav('a-onboarding',this)">Onboarding</div>
+  </div>
+
+  <!-- Admin Panel full link -->
+  <a href="OzoneWash_Admin.html" target="_blank" style="
+    display:inline-flex;align-items:center;gap:7px;
+    padding:7px 16px;border-radius:20px;
+    background:rgba(240,180,41,.07);border:1px solid rgba(240,180,41,.2);
+    color:#F0B429;font-family:'Outfit',sans-serif;font-size:11px;font-weight:700;
+    text-decoration:none;margin-bottom:14px;transition:all .15s;
+  " onmouseover="this.style.background='rgba(240,180,41,.14)'" onmouseout="this.style.background='rgba(240,180,41,.07)'">
+    ⚙️ Open Full Admin Panel (Desktop) →
+  </a>
+
+  <!-- phone bezel -->
+  <div style="
+    background:linear-gradient(145deg,#18282c,#0c1c20);
+    border-radius:52px;
+    padding:12px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.07),
+      0 0 0 1px rgba(0,0,0,.6),
+      0 50px 100px rgba(0,0,0,.85),
+      0 0 80px rgba(0,196,160,.04);
+    position:relative;
+  ">
+    <!-- side buttons -->
+    <div style="position:absolute;right:-3px;top:140px;width:3px;height:70px;background:#141e20;border-radius:0 3px 3px 0;box-shadow:0 85px 0 #141e20;"></div>
+    <div style="position:absolute;left:-3px;top:120px;width:3px;height:44px;background:#141e20;border-radius:3px 0 0 3px;box-shadow:0 58px 0 #141e20,0 106px 0 #141e20;"></div>
+
+    <!-- phone screen area -->
+    <div style="width:390px;height:844px;border-radius:42px;overflow:hidden;position:relative;">
+
+      <!-- notch -->
+      <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:36px;background:#06100e;border-radius:0 0 24px 24px;z-index:200;display:flex;align-items:center;justify-content:center;gap:10px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#0f1e1c;border:1.5px solid #1a2a28;"></div>
+        <div style="width:48px;height:5px;border-radius:10px;background:#0f1e1c;"></div>
+      </div>
+
+      <!-- status bar -->
+      <div style="position:absolute;top:0;left:0;right:0;height:50px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 8px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#E0F7F4;z-index:150;pointer-events:none;">
+        <span>9:41</span>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <svg width="16" height="12" fill="#E0F7F4" viewBox="0 0 16 12"><rect x="0" y="4" width="3" height="8" rx="1" opacity=".3"/><rect x="4.5" y="2.5" width="3" height="9.5" rx="1" opacity=".6"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13" y="0" width="2.5" height="12" rx="1"/></svg>
+          <svg width="16" height="13" fill="none" stroke="#E0F7F4" stroke-width="1.5" viewBox="0 0 24 19"><path d="M1 6.5C6.5 1 17.5 1 23 6.5"/><path d="M4 10c4.5-4 11.5-4 16 0"/><path d="M7.5 13.5c3-2.5 6-2.5 9 0"/><circle cx="12" cy="17" r="1.5" fill="#E0F7F4"/></svg>
+          <svg width="26" height="13" fill="#E0F7F4" viewBox="0 0 26 13"><rect x="0" y="1" width="22" height="11" rx="3" stroke="#E0F7F4" stroke-width="1.2" fill="none"/><rect x="22.5" y="4" width="2.5" height="5" rx="1"/><rect x="1.5" y="2.5" width="18" height="8" rx="2" fill="#E0F7F4"/></svg>
+        </div>
+      </div>
+
+<div class="phone-wrap" id="app" style="position:absolute;inset:0;border-radius:42px;">
+
+<!-- ====== SPLASH ====== -->
+<div class="screen active" id="splash" style="background:radial-gradient(ellipse at 50% 25%,#0d3038 0%,#071A1F 70%);justify-content:space-between;">
+  <div class="splash-glow"></div>
+  <div class="splash-water-rings"><span></span><span></span><span></span></div>
+
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;position:relative;z-index:1;">
+    <!-- ACTUAL LOGO -->
+    <div style="position:relative;">
+      <div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(0,196,160,.25),rgba(0,196,160,.08));display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(0,196,160,.2);">
+        <svg width="90" height="90" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- outer ring with gradient -->
+          <circle cx="45" cy="45" r="40" stroke="url(#logoRing)" stroke-width="4.5" fill="none"/>
+          <!-- water fill bottom -->
+          <path d="M10 60 Q25 72 45 72 Q65 72 80 60 L80 80 Q65 88 45 88 Q25 88 10 80 Z" fill="rgba(30,144,212,.25)"/>
+          <path d="M6 65 Q25 78 45 78 Q65 78 84 65" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"/>
+          <!-- green leaf left -->
+          <path d="M23 28 C18 38 21 50 30 52 C28 40 36 32 43 30 C37 24 26 22 23 28Z" fill="#2DB34A"/>
+          <path d="M28 38 C32 34 38 31 43 30" stroke="#1A7A30" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          <!-- blue bubbles top-right -->
+          <circle cx="60" cy="24" r="8.5" stroke="#1E90D4" stroke-width="2.8" fill="none"/>
+          <circle cx="73" cy="18" r="5.5" stroke="#1E90D4" stroke-width="2.2" fill="none"/>
+          <circle cx="78" cy="30" r="3.5" stroke="#1E90D4" stroke-width="1.8" fill="none"/>
+          <defs>
+            <linearGradient id="logoRing" x1="0" y1="0" x2="90" y2="90">
+              <stop offset="0%" stop-color="#1E90D4"/>
+              <stop offset="50%" stop-color="#00C4A0"/>
+              <stop offset="100%" stop-color="#1260A8"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <div style="font-size:40px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1;">OZONE</div>
+      <div style="font-size:22px;font-weight:700;color:var(--T);letter-spacing:8px;margin-top:2px;">WASH</div>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,196,160,.3),transparent);margin:16px auto;width:80px;"></div>
+      <div style="font-size:17px;font-weight:700;color:#fff;margin-bottom:6px;">Pure Water. Healthy Life.</div>
+      <div style="font-size:13px;color:var(--txt2);">Professional Tank & Sump Hygiene Services</div>
+    </div>
+
+    <div style="width:100%;padding:0 28px;">
+      <button class="btn-primary" onclick="goTo('ob1')" style="font-size:17px;letter-spacing:.5px;">Get Started &nbsp;→</button>
+    </div>
+  </div>
+
+  <div style="padding:0 24px 40px;position:relative;z-index:1;">
+    <div class="trust-row">
+      <div class="trust-item">🛡️ Certified</div>
+      <div class="trust-sep">|</div>
+      <div class="trust-item">🍃 Eco-Friendly</div>
+      <div class="trust-sep">|</div>
+      <div class="trust-item">🕐 24/7 Support</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ONBOARDING 1-4 ====== -->
+<div class="screen" id="ob1">
+  <div style="padding:54px 32px 32px;display:flex;flex-direction:column;height:100%;">
+    <div style="text-align:right;"><span style="color:var(--txt3);font-size:14px;font-weight:600;cursor:pointer;" onclick="goTo('home')">Skip</span></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+      <div class="ob-conic"><div class="ob-conic-inner"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="6" y="8" width="28" height="26" rx="5" stroke="var(--T)" stroke-width="2.2"/><path d="M13 20L18 25L28 15" stroke="var(--G)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+      <h1>3-Tap<br>Tank Booking</h1>
+      <p>Reserve your professional ozone cleaning in just 3 taps. Select tank, pick your slot, confirm.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goTo('ob2')">Continue</button>
+  </div>
+</div>
+
+<div class="screen" id="ob2">
+  <div style="padding:54px 32px 32px;display:flex;flex-direction:column;height:100%;">
+    <div style="text-align:right;"><span style="color:var(--txt3);font-size:14px;font-weight:600;cursor:pointer;" onclick="goTo('home')">Skip</span></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+      <div class="ob-conic"><div class="ob-conic-inner"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="12" stroke="var(--T)" stroke-width="2.2"/><circle cx="20" cy="20" r="4" stroke="var(--T)" stroke-width="2.2"/><path d="M20 4V8M20 32V36M4 20H8M32 20H36" stroke="var(--T)" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>
+      <h1>Live Job<br>Tracking</h1>
+      <p>Watch your cleaning team on the map in real-time. Every step updated live with ETA.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goTo('ob3')">Continue</button>
+  </div>
+</div>
+
+<div class="screen" id="ob3">
+  <div style="padding:54px 32px 32px;display:flex;flex-direction:column;height:100%;">
+    <div style="text-align:right;"><span style="color:var(--txt3);font-size:14px;font-weight:600;cursor:pointer;" onclick="goTo('home')">Skip</span></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+      <div class="ob-conic"><div class="ob-conic-inner"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="8" y="6" width="24" height="30" rx="4" stroke="var(--T)" stroke-width="2.2"/><path d="M14 20L18 24L26 16" stroke="var(--G)" stroke-width="2.2" stroke-linecap="round"/><rect x="14" y="28" width="12" height="4" rx="2" fill="rgba(0,196,160,.3)"/></svg></div></div>
+      <h1>Digital Hygiene<br>Certificate</h1>
+      <p>QR-verified certificate with your EcoScore after every clean. Share with society or family.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goTo('ob4')">Continue</button>
+  </div>
+</div>
+
+<div class="screen" id="ob4">
+  <div style="padding:54px 32px 32px;display:flex;flex-direction:column;height:100%;">
+    <div style="text-align:right;"><span style="color:var(--txt3);font-size:14px;font-weight:600;cursor:pointer;" onclick="goTo('home')">Skip</span></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:16px;">
+      <div class="ob-conic"><div class="ob-conic-inner"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="14" r="7" stroke="var(--G)" stroke-width="2.2"/><path d="M8 34 Q8 26 20 26 Q32 26 32 34" stroke="var(--T)" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg></div></div>
+      <h1>Certified<br>Eco-Agents</h1>
+      <p>Background-verified, eco-certified agents. 100% chemical-free ozone process. DPIIT certified.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
+        <div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goTo('home')">Get Started →</button>
+  </div>
+</div>
+
+<!-- ====== HOME ====== -->
+<div class="screen" id="home">
+  <div class="scroll-content">
+    <!-- HEADER -->
+    <div style="padding:54px 24px 14px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:13px;color:var(--txt3);font-weight:500;">Good morning 👋</div>
+        <h2>Ramesh Sappa</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div onclick="goTo('notifs')" style="position:relative;cursor:pointer;width:40px;height:40px;background:var(--s2);border-radius:12px;border:1px solid var(--e1);display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style="animation:bellWobble 5s 2s ease-in-out infinite;">
+            <path d="M10 2Q14 2 16 7L18 16H2L4 7Q6 2 10 2Z" stroke="var(--T)" stroke-width="1.6" fill="rgba(0,196,160,.08)"/>
+            <path d="M8 16Q8 19 10 19Q12 19 12 16" stroke="var(--T)" stroke-width="1.6" fill="none"/>
+          </svg>
+          <div style="position:absolute;top:-2px;right:-2px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--bg);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ECOSCORE CARD -->
+    <div class="ecoscore-card" onclick="goTo('cert')">
+      <div class="eco-shimmer"></div>
+      <div style="position:absolute;right:16px;top:16px;opacity:.05;font-size:70px;font-weight:900;color:var(--T);line-height:1;">OW</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Your EcoScore</div>
+          <div class="eco-num">87</div>
+        </div>
+        <div class="chip gold">🏆 GOLD</div>
+      </div>
+      <div style="font-size:12px;color:var(--txt2);margin-top:2px;">Next cleaning: <span class="mono" style="color:var(--txt);">15 Aug 2025</span></div>
+      <div class="eco-bar"><div class="eco-fill"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;">
+        <span style="font-size:10px;color:var(--txt3);">0</span>
+        <span style="font-size:10px;color:var(--T);font-weight:700;">GOLD ≥ 80</span>
+        <span style="font-size:10px;color:var(--txt3);">100</span>
+      </div>
+    </div>
+
+    <!-- LIVE STRIP -->
+    <div class="live-strip" onclick="goTo('track')">
+      <div class="live-dot"></div>
+      <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--txt);">Cleaning in Progress</div><div style="font-size:12px;color:var(--txt3);">Est. completion <span class="mono">11:30 AM</span> · <span style="color:var(--T);">73% done</span></div></div>
+      <div style="display:flex;gap:8px;">
+        <div onclick="event.stopPropagation();goTo('cotp_start')" style="background:rgba(0,196,160,.12);border:1px solid var(--e2);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800;color:var(--T);cursor:pointer;white-space:nowrap;">🔑 OTP</div>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;align-self:center;"><path d="M6 4L10 8L6 12" stroke="var(--T)" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="quick-actions">
+      <div class="qa" onclick="goTo('bk1')"><div class="qa-ic" style="background:rgba(0,196,160,.1);">📅</div><span style="font-size:11px;font-weight:600;color:var(--txt2);">Book Now</span></div>
+      <div class="qa" onclick="goTo('track')"><div class="qa-ic" style="background:rgba(0,196,160,.1);">📍</div><span style="font-size:11px;font-weight:600;color:var(--txt2);">Track</span></div>
+      <div class="qa" onclick="goTo('cert')"><div class="qa-ic" style="background:rgba(240,180,41,.1);">🏅</div><span style="font-size:11px;font-weight:600;color:var(--txt2);">Certificates</span></div>
+      <div class="qa" onclick="openChat()"><div class="qa-ic" style="background:rgba(0,196,160,.1);">💬</div><span style="font-size:11px;font-weight:600;color:var(--txt2);">Support</span></div>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="section-label">OUR SERVICES</div>
+    <div class="service-cards">
+      <div class="service-card" onclick="goTo('bk1')">
+        <div style="font-size:26px;margin-bottom:10px;">🪣</div>
+        <div style="font-weight:700;color:var(--txt);margin-bottom:3px;">Tank Cleaning</div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Ozone-based hygiene</div>
+        <div class="mono" style="color:var(--T);font-size:15px;font-weight:700;">from ₹799</div>
+        <div style="position:absolute;bottom:12px;right:12px;color:var(--T);font-size:16px;">→</div>
+      </div>
+      <div class="service-card" onclick="goTo('bk1')">
+        <div style="font-size:26px;margin-bottom:10px;">🏊</div>
+        <div style="font-weight:700;color:var(--txt);margin-bottom:3px;">Sump Cleaning</div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Deep sanitization</div>
+        <div class="mono" style="color:var(--T);font-size:15px;font-weight:700;">from ₹999</div>
+        <div style="position:absolute;bottom:12px;right:12px;color:var(--T);font-size:16px;">→</div>
+      </div>
+      <div class="service-card" onclick="goTo('bk1')">
+        <div style="font-size:26px;margin-bottom:10px;">🛢️</div>
+        <div style="font-weight:700;color:var(--txt);margin-bottom:3px;">Syntax Tank</div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:8px;">Quick clean</div>
+        <div class="mono" style="color:var(--T);font-size:15px;font-weight:700;">from ₹799</div>
+        <div style="position:absolute;bottom:12px;right:12px;color:var(--T);font-size:16px;">→</div>
+      </div>
+    </div>
+
+    <!-- AMC STRIP -->
+    <div class="amc-strip">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--T);">AMC Active ✓</div>
+        <div style="font-size:12px;color:var(--txt3);">Quarterly Plan · <span class="mono" style="color:var(--txt);">45 days left</span></div>
+      </div>
+      <button style="background:rgba(0,196,160,.12);border:1px solid rgba(0,196,160,.25);color:var(--T);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;">Manage</button>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+
+  <div style="position:relative;z-index:1;">
+    <div class="fab" onclick="goTo('bk1')">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 4V18M4 11H18" stroke="#071A1F" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" onclick="goTo('home')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 9L10 3L17 9V17H13V12H7V17H3Z" stroke="var(--T)" stroke-width="1.7" fill="rgba(0,196,160,.1)"/></svg></div>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" onclick="goTo('bk1')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="3" stroke="var(--txt3)" stroke-width="1.7"/><path d="M7 2V6M13 2V6M3 9H17" stroke="var(--txt3)" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+      <span>Book</span>
+    </div>
+    <div class="nav-item" onclick="goTo('track')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="6" stroke="var(--txt3)" stroke-width="1.7"/><circle cx="10" cy="10" r="2" stroke="var(--txt3)" stroke-width="1.7"/></svg></div>
+      <span>Track</span>
+    </div>
+    <div class="nav-item" onclick="goTo('cert')">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="var(--txt3)" stroke-width="1.7"/><path d="M7 10L9 12L13 8" stroke="var(--txt3)" stroke-width="1.7" stroke-linecap="round"/></svg></div>
+      <span>Cert</span>
+    </div>
+    <div class="nav-item" onclick="">
+      <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="4" stroke="var(--txt3)" stroke-width="1.7"/><path d="M3 17Q3 13 10 13Q17 13 17 17" stroke="var(--txt3)" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg></div>
+      <span>Profile</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== NOTIFICATIONS ====== -->
+<div class="screen" id="notifs">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2 style="flex:1;">Notifications</h2>
+    <span style="font-size:13px;color:var(--T);font-weight:700;cursor:pointer;" onclick="this.closest('#notifs').querySelectorAll('.unread').forEach(e=>e.classList.remove('unread'))">Mark all read</span>
+  </div>
+  <div class="scroll-content">
+    <div class="notif-item unread" onclick="goTo('track')">
+      <div style="width:44px;height:44px;border-radius:14px;background:rgba(0,196,160,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🚗</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--txt);">Agent on the way</div><div style="font-size:12px;color:var(--txt3);">Suresh Kumar is <span class="mono">14 min</span> away</div><div class="mono" style="font-size:11px;color:var(--txt3);margin-top:4px;">Today, 10:32 AM</div></div>
+    </div>
+    <div class="notif-item unread">
+      <div style="width:44px;height:44px;border-radius:14px;background:rgba(0,196,160,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">✅</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--txt);">Booking Confirmed</div><div style="font-size:12px;color:var(--txt3);">1000L Overhead Tank · Tomorrow 9 AM</div><div class="mono" style="font-size:11px;color:var(--txt3);margin-top:4px;">Today, 9:15 AM</div></div>
+    </div>
+    <div class="notif-item">
+      <div style="width:44px;height:44px;border-radius:14px;background:rgba(240,180,41,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🏆</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--txt);">Certificate Ready</div><div style="font-size:12px;color:var(--txt3);">EcoScore 87 · GOLD Grade issued</div><div class="mono" style="font-size:11px;color:var(--txt3);margin-top:4px;">Yesterday, 3:45 PM</div></div>
+    </div>
+    <div class="notif-item">
+      <div style="width:44px;height:44px;border-radius:14px;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">⏰</div>
+      <div><div style="font-size:14px;font-weight:700;color:var(--txt);">AMC Renewal Reminder</div><div style="font-size:12px;color:var(--txt3);">Your AMC renews in <span class="mono">43 days</span></div><div class="mono" style="font-size:11px;color:var(--txt3);margin-top:4px;">2 days ago</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TRACK ====== -->
+<div class="screen" id="track">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Track Service</h2><div class="mono" style="font-size:12px;color:var(--txt3);">#OZW-2025-0042</div></div>
+    <div style="width:36px;height:36px;border-radius:11px;background:rgba(0,196,160,.1);border:1px solid var(--e2);display:flex;align-items:center;justify-content:center;cursor:pointer;">📞</div>
+  </div>
+  <div class="scroll-content">
+    <!-- Map -->
+    <div class="map-mock">
+      <div class="map-grid"></div>
+      <!-- Road lines -->
+      <div style="position:absolute;top:30%;left:0;right:0;height:1px;background:rgba(0,196,160,.08);"></div>
+      <div style="position:absolute;top:60%;left:0;right:0;height:1px;background:rgba(0,196,160,.08);"></div>
+      <div style="position:absolute;top:0;bottom:0;left:40%;width:1px;background:rgba(0,196,160,.08);"></div>
+      <div class="map-route"></div>
+      <div class="agent-pin"><div style="width:10px;height:10px;border-radius:50%;background:#fff;"></div></div>
+      <div class="dest-pin"></div>
+      <div style="position:absolute;bottom:10px;right:10px;background:rgba(0,196,160,.9);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;color:#071A1F;">● LIVE</div>
+      <div style="position:absolute;top:12px;left:12px;background:rgba(7,26,31,.8);border-radius:10px;padding:6px 12px;">
+        <div style="font-size:10px;color:var(--txt3);">Cleaning in Progress</div>
+        <div style="font-size:13px;font-weight:700;color:var(--txt);">Est. 11:30 AM</div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="margin:12px 16px 0;background:var(--s1);border-radius:14px;border:1px solid var(--e1);padding:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <div style="font-size:14px;font-weight:700;color:var(--txt);">73% Complete</div>
+        <div class="chip teal">In Progress</div>
+      </div>
+      <div class="progress-bar" style="height:8px;"><div class="progress-fill" style="width:73%;"></div></div>
+    </div>
+
+    <!-- Agent card -->
+    <div class="card" style="margin:12px 16px;padding:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Service Team</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:48px;height:48px;border-radius:16px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#071A1F;">RK</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:var(--txt);">Ravi Kumar</div>
+          <div style="font-size:12px;color:var(--txt3);">⭐ <span class="mono">4.9</span> (312 services)</div>
+        </div>
+        <div style="width:36px;height:36px;border-radius:12px;background:rgba(0,196,160,.1);border:1px solid var(--e2);display:flex;align-items:center;justify-content:center;cursor:pointer;">📞</div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card" style="margin:0 16px 16px;padding:16px;">
+      <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Service Progress</div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,196,160,.15);border:2px solid var(--T);display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+            <div style="width:2px;flex:1;background:rgba(0,196,160,.2);margin:3px 0;min-height:20px;"></div>
+          </div>
+          <div style="padding-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--txt);">Booking Confirmed</div><div class="mono" style="font-size:11px;color:var(--txt3);">9:30 AM</div></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,196,160,.15);border:2px solid var(--T);display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+            <div style="width:2px;flex:1;background:rgba(0,196,160,.2);margin:3px 0;min-height:20px;"></div>
+          </div>
+          <div style="padding-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--txt);">Team Assigned</div><div class="mono" style="font-size:11px;color:var(--txt3);">9:35 AM</div></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,196,160,.15);border:2px solid var(--T);display:flex;align-items:center;justify-content:center;font-size:12px;">✓</div>
+            <div style="width:2px;flex:1;background:rgba(0,196,160,.2);margin:3px 0;min-height:20px;"></div>
+          </div>
+          <div style="padding-bottom:14px;"><div style="font-size:13px;font-weight:700;color:var(--txt);">En Route</div><div class="mono" style="font-size:11px;color:var(--txt3);">9:45 AM</div></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="display:flex;flex-direction:column;align-items:center;">
+            <div style="width:28px;height:28px;border-radius:50%;background:rgba(0,196,160,.15);border:2px solid var(--T);display:flex;align-items:center;justify-content:center;font-size:12px;animation:pulse 1s ease-in-out infinite;color:var(--T);">●</div>
+          </div>
+          <div><div style="font-size:13px;font-weight:700;color:var(--T);">Arrived & Cleaning</div><div class="mono" style="font-size:11px;color:var(--txt3);">10:00 AM</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0 16px 16px;display:flex;gap:10px;">
+      <button style="flex:1;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:var(--red);border-radius:14px;height:46px;font-family:Outfit,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">⚠️ Report Issue</button>
+      <button class="btn-primary" style="flex:1;height:46px;font-size:14px;" onclick="goTo('home')">🏠 Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== BOOKING 1 ====== -->
+<div class="screen" id="bk1">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Step 1 of 4</div><h2>Book Service</h2></div>
+  </div>
+  <div style="padding:0 24px 8px;"><div style="font-size:14px;font-weight:600;color:var(--T);margin-bottom:6px;">Select Tank Type</div><div style="font-size:13px;color:var(--txt3);">Choose the type of tank you want to clean</div></div>
+  <div style="padding:0 24px 8px;"><div class="progress-bar"><div class="progress-fill" style="width:25%"></div></div></div>
+  <div class="scroll-content" style="padding:16px 24px 0;">
+    <div class="tank-option sel" id="tt0" onclick="selTank(0)">
+      <div class="radio" id="tr0"></div>
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(0,196,160,.1);display:flex;align-items:center;justify-content:center;font-size:20px;">🪣</div>
+      <div><div style="font-weight:700;color:var(--txt);">Overhead Tank</div><div style="font-size:12px;color:var(--txt3);">500L · 1000L · 2000L · 5000L</div></div>
+    </div>
+    <div class="tank-option" id="tt1" onclick="selTank(1)">
+      <div class="radio" id="tr1"></div>
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(0,196,160,.1);display:flex;align-items:center;justify-content:center;font-size:20px;">🏊</div>
+      <div><div style="font-weight:700;color:var(--txt);">Underground Sump</div><div style="font-size:12px;color:var(--txt3);">1000L · 2500L · 5000L · 10000L</div></div>
+    </div>
+    <div class="tank-option" id="tt2" onclick="selTank(2)">
+      <div class="radio" id="tr2"></div>
+      <div style="width:40px;height:40px;border-radius:12px;background:rgba(0,196,160,.1);display:flex;align-items:center;justify-content:center;font-size:20px;">🛢️</div>
+      <div><div style="font-weight:700;color:var(--txt);">Syntax Tank</div><div style="font-size:12px;color:var(--txt3);">500L · 1000L · 2000L</div></div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;">Select Size</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <div class="size-chip sel" id="sc0" onclick="selSize(0)">500L</div>
+      <div class="size-chip" id="sc1" onclick="selSize(1)">1000L</div>
+      <div class="size-chip" id="sc2" onclick="selSize(2)">2000L</div>
+      <div class="size-chip" id="sc3" onclick="selSize(3)">5000L</div>
+    </div>
+    <div style="height:60px;"></div>
+  </div>
+  <div class="bk-footer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:14px;color:var(--txt2);">Total</div>
+      <div class="mono" style="font-size:22px;font-weight:700;color:var(--T);" id="bkP1">₹799</div>
+    </div>
+    <button class="btn-primary" onclick="goTo('bk2')">Continue →</button>
+  </div>
+</div>
+
+<!-- ====== BOOKING 2 ====== -->
+<div class="screen" id="bk2">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('bk1')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Step 2 of 4</div><h2>Pick Date & Slot</h2></div>
+  </div>
+  <div style="padding:0 24px 8px;"><div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div></div>
+  <div class="scroll-content">
+    <div class="section-label">SELECT DATE</div>
+    <div style="display:flex;gap:8px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;" id="dateRow"></div>
+    <div class="section-label">SELECT TIME SLOT</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 16px 16px;" id="slotRow"></div>
+    <div style="margin:0 16px 16px;background:rgba(0,196,160,.06);border:1px solid var(--e2);border-radius:14px;padding:14px 16px;">
+      <div style="font-size:12px;color:var(--txt3);">Selected Slot</div>
+      <div style="font-size:15px;font-weight:700;color:var(--txt);margin-top:3px;" id="slotSummary">Tomorrow · 9:00 AM – 11:00 AM</div>
+    </div>
+    <div style="height:80px;"></div>
+  </div>
+  <div class="bk-footer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:14px;color:var(--txt2);">Total so far</div>
+      <div class="mono" style="font-size:22px;font-weight:700;color:var(--T);" id="bkP2">₹799</div>
+    </div>
+    <button class="btn-primary" onclick="goTo('bk3')">Continue →</button>
+  </div>
+</div>
+
+<!-- ====== BOOKING 3 ====== -->
+<div class="screen" id="bk3">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('bk2')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Step 3 of 4</div><h2>Add-ons</h2></div>
+  </div>
+  <div style="padding:0 24px 8px;"><div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div></div>
+  <div class="scroll-content" style="padding:0 24px;">
+    <div style="height:8px;"></div>
+    <div class="addon-item" onclick="togAddon(0)"><div class="checkbox" id="cb0"></div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">🧱 Lime Descaling</div><div style="font-size:12px;color:var(--txt3);">Remove stubborn lime deposits</div></div><div class="mono" style="font-size:14px;color:var(--T);">₹299</div></div>
+    <div class="addon-item" onclick="togAddon(1)"><div class="checkbox on" id="cb1"></div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">☀️ UV Sterilization</div><div style="font-size:12px;color:var(--txt3);">Extra UV germ kill treatment</div></div><div class="mono" style="font-size:14px;color:var(--T);">₹499</div></div>
+    <div class="addon-item" onclick="togAddon(2)"><div class="checkbox" id="cb2"></div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">🧫 Microbial Test</div><div style="font-size:12px;color:var(--txt3);">Lab water quality report</div></div><div class="mono" style="font-size:14px;color:var(--T);">₹199</div></div>
+    <div class="addon-item" onclick="togAddon(3)"><div class="checkbox" id="cb3"></div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">🔍 Tank Health Check</div><div style="font-size:12px;color:var(--txt3);">Crack & leak inspection report</div></div><div class="mono" style="font-size:14px;color:var(--T);">₹149</div></div>
+    <div class="addon-item" onclick="togAddon(4)" style="border-bottom:none;"><div class="checkbox" id="cb4"></div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">🌿 Anti-Algae Treatment</div><div style="font-size:12px;color:var(--txt3);">Prevent algae for 6 months</div></div><div class="mono" style="font-size:14px;color:var(--T);">₹349</div></div>
+    <div style="height:80px;"></div>
+  </div>
+  <div class="bk-footer">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-size:14px;color:var(--txt2);">Total</div>
+      <div class="mono" style="font-size:22px;font-weight:700;color:var(--T);" id="bkP3">₹1,298</div>
+    </div>
+    <button class="btn-primary" onclick="goTo('bk4')">Continue →</button>
+  </div>
+</div>
+
+<!-- ====== BOOKING 4 ====== -->
+<div class="screen" id="bk4">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('bk3')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Step 4 of 4</div><h2>Review & Pay</h2></div>
+  </div>
+  <div style="padding:0 24px 8px;"><div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div></div>
+  <div class="scroll-content">
+    <div class="review-table" style="margin-top:16px;">
+      <div class="rt-row"><span style="font-size:12px;color:var(--txt3);">Service</span><span style="font-size:13px;font-weight:700;color:var(--txt);" id="rv0">Overhead Tank · 500L</span></div>
+      <div class="rt-row"><span style="font-size:12px;color:var(--txt3);">Date</span><span class="mono" style="font-size:13px;font-weight:700;color:var(--txt);" id="rv1">Tomorrow</span></div>
+      <div class="rt-row"><span style="font-size:12px;color:var(--txt3);">Time</span><span class="mono" style="font-size:13px;font-weight:700;color:var(--txt);" id="rv2">9 AM–11 AM</span></div>
+      <div class="rt-row"><span style="font-size:12px;color:var(--txt3);">Add-ons</span><span style="font-size:12px;font-weight:600;color:var(--txt);text-align:right;max-width:170px;" id="rv3">UV Sterilization</span></div>
+      <div class="rt-row"><span style="font-size:12px;color:var(--txt3);">Base Price</span><span class="mono" style="font-size:13px;font-weight:700;color:var(--txt);" id="rv4">₹799</span></div>
+      <div class="rt-row"><span style="font-size:12px;color:var(--txt3);">Add-ons</span><span class="mono" style="font-size:13px;font-weight:700;color:var(--txt);" id="rv5">₹499</span></div>
+      <div class="rt-row"><span style="font-size:12px;color:var(--T);">EcoScore Discount 5%</span><span class="mono" style="font-size:13px;font-weight:700;color:var(--T);" id="rv6">−₹65</span></div>
+      <div class="rt-row" style="background:rgba(0,196,160,.04);"><span style="font-size:15px;font-weight:800;color:var(--txt);">TOTAL</span><span class="mono" style="font-size:17px;font-weight:700;color:var(--T);" id="rv7">₹999</span></div>
+    </div>
+    <div class="section-label">PAYMENT METHOD</div>
+    <div style="padding:0 16px;">
+      <div class="pay-card sel" id="pm0" onclick="selPay(0)">
+        <div style="font-size:22px;">📱</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--txt);">UPI / GPay / PhonePe</div><div style="font-size:12px;color:var(--txt3);">Instant payment</div></div>
+        <div style="width:18px;height:18px;border-radius:9px;border:2px solid var(--T);display:flex;align-items:center;justify-content:center;" id="pmr0"><div style="width:9px;height:9px;border-radius:50%;background:var(--T);"></div></div>
+      </div>
+      <div class="pay-card" id="pm1" onclick="selPay(1)">
+        <div style="font-size:22px;">💳</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--txt);">Credit / Debit Card</div><div style="font-size:12px;color:var(--txt3);">Razorpay secured</div></div>
+        <div style="width:18px;height:18px;border-radius:9px;border:2px solid var(--txt3);" id="pmr1"></div>
+      </div>
+      <div class="pay-card" id="pm2" onclick="selPay(2)">
+        <div style="font-size:22px;">🤝</div>
+        <div style="flex:1;"><div style="font-weight:700;color:var(--txt);">Pay on Site</div><div style="font-size:12px;color:var(--txt3);">Cash or UPI to agent</div></div>
+        <div style="width:18px;height:18px;border-radius:9px;border:2px solid var(--txt3);" id="pmr2"></div>
+      </div>
+    </div>
+    <div style="height:80px;"></div>
+  </div>
+  <div class="bk-footer">
+    <button class="btn-primary" onclick="goTo('confirmed')">Confirm & Pay <span class="mono" id="camt">₹999</span></button>
+  </div>
+</div>
+
+<!-- ====== CONFIRMED ====== -->
+<div class="screen" id="confirmed">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px;text-align:center;">
+    <div class="success-ring"><div style="width:68px;height:68px;border-radius:50%;background:rgba(0,196,160,.25);display:flex;align-items:center;justify-content:center;font-size:30px;">✅</div></div>
+    <h1 style="margin-bottom:8px;">Booking Confirmed!</h1>
+    <p style="margin-bottom:24px;">Your ozone cleaning is scheduled. We'll notify you when the team is on the way.</p>
+    <div class="card" style="width:100%;padding:20px;margin-bottom:16px;">
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:4px;">Booking ID</div>
+      <div class="mono" style="font-size:20px;font-weight:700;color:var(--T);">#OZW-2025-0043</div>
+      <div style="height:1px;background:var(--e1);margin:14px 0;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;">
+        <div><div style="font-size:10px;color:var(--txt3);">SERVICE</div><div style="font-size:13px;font-weight:700;color:var(--txt);">Overhead 500L</div></div>
+        <div><div style="font-size:10px;color:var(--txt3);">DATE</div><div class="mono" style="font-size:13px;font-weight:700;color:var(--txt);">Tomorrow</div></div>
+        <div><div style="font-size:10px;color:var(--txt3);">SLOT</div><div class="mono" style="font-size:13px;font-weight:700;color:var(--txt);">9–11 AM</div></div>
+        <div><div style="font-size:10px;color:var(--txt3);">AMOUNT</div><div class="mono" style="font-size:13px;font-weight:700;color:var(--T);">₹999</div></div>
+      </div>
+    </div>
+    <div style="background:rgba(0,196,160,.06);border:1px solid var(--e2);border-radius:14px;padding:12px 16px;width:100%;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">💬</span>
+      <div style="font-size:13px;color:var(--txt2);">Booking confirmation sent on <span style="color:var(--T);font-weight:700;">WhatsApp</span></div>
+    </div>
+  </div>
+  <div style="padding:0 24px 40px;display:flex;flex-direction:column;gap:10px;">
+    <button class="btn-primary" onclick="goTo('cert')">View Certificate</button>
+    <button class="btn-secondary" onclick="goTo('home')">Back to Home</button>
+  </div>
+</div>
+
+<!-- ====== CERTIFICATE ====== -->
+<div class="screen" id="cert" style="z-index:5;width:390px;max-width:390px;">
+  <div style="display:flex;align-items:center;gap:12px;padding:54px 16px 14px;flex-shrink:0;">
+    <div class="back-btn" onclick="goTo('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2 style="flex:1;font-size:20px;">Hygiene Certificate</h2>
+    <div style="width:36px;height:36px;border-radius:11px;background:rgba(0,196,160,.1);border:1px solid var(--e2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">⬆️</div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;width:390px;max-width:390px;">
+
+    <!-- CERT CARD — all widths locked -->
+    <div style="margin:0 14px 0;width:362px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.4);">
+
+      <!-- NAVY HEADER -->
+      <div style="background:#1A2A4A;padding:16px;width:362px;box-sizing:border-box;">
+        <div style="display:flex;align-items:center;gap:10px;width:330px;">
+          <!-- Logo compact -->
+          <svg width="44" height="44" viewBox="0 0 90 90" fill="none" style="flex-shrink:0;">
+            <circle cx="45" cy="45" r="40" stroke="url(#cr1)" stroke-width="5" fill="none"/>
+            <path d="M12 62 Q30 74 45 74 Q60 74 78 62" fill="rgba(30,144,212,.3)"/>
+            <path d="M8 67 Q30 80 45 80 Q60 80 82 67" fill="none" stroke="rgba(255,255,255,.35)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M22 28 C17 39 20 51 30 53 C28 40 36 31 43 29 C36 23 25 22 22 28Z" fill="#2DB34A"/>
+            <circle cx="60" cy="24" r="9" stroke="#1E90D4" stroke-width="3" fill="none"/>
+            <circle cx="73" cy="18" r="6" stroke="#1E90D4" stroke-width="2.5" fill="none"/>
+            <circle cx="79" cy="31" r="4" stroke="#1E90D4" stroke-width="2" fill="none"/>
+            <defs><linearGradient id="cr1" x1="0" y1="0" x2="90" y2="90"><stop offset="0%" stop-color="#1E90D4"/><stop offset="100%" stop-color="#1260A8"/></linearGradient></defs>
+          </svg>
+          <div style="min-width:0;overflow:hidden;">
+            <div style="font-size:7px;font-weight:700;color:rgba(255,255,255,.45);letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">TANK &amp; SUMP CLEANING SERVICE</div>
+            <div style="font-size:15px;font-weight:900;color:#fff;white-space:nowrap;">HYGIENE CERTIFICATE</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:5px;">
+          <span style="color:#00C4A0;font-size:12px;">★</span>
+          <span style="font-size:11px;font-weight:700;color:#00C4A0;">Verified &amp; Certified</span>
+        </div>
+      </div>
+
+      <!-- WHITE BODY -->
+      <div style="padding:14px;width:362px;box-sizing:border-box;background:#fff;">
+
+        <!-- Data rows — use table for perfect layout -->
+        <table style="width:100%;border-collapse:collapse;font-family:'Outfit',sans-serif;">
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="font-size:11px;color:#888;padding:7px 0;width:90px;">Cert No.</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#1a1a1a;text-align:right;padding:7px 0;word-break:break-all;">OZW-HYG-2025-001234</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="font-size:11px;color:#888;padding:7px 0;">Service Date</td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#1a1a1a;text-align:right;padding:7px 0;">15 Jul 2025</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="font-size:11px;color:#888;padding:7px 0;">Tank Type</td>
+            <td style="font-size:11px;font-weight:700;color:#1a1a1a;text-align:right;padding:7px 0;">Overhead — 2000L</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f0f0f0;">
+            <td style="font-size:11px;color:#888;padding:7px 0;">Location</td>
+            <td style="font-size:11px;font-weight:700;color:#1a1a1a;text-align:right;padding:7px 0;">Green Valley Apts</td>
+          </tr>
+          <tr>
+            <td style="font-size:11px;color:#888;padding:7px 0;">Treatment</td>
+            <td style="font-size:11px;font-weight:700;color:#1a1a1a;text-align:right;padding:7px 0;">Ozone + UV Sterilization</td>
+          </tr>
+        </table>
+
+        <!-- EcoScore block -->
+        <div style="margin-top:12px;padding:12px;background:#f0fdf9;border-radius:12px;border:1px solid #b2f0e0;">
+          <div style="font-size:11px;color:#666;margin-bottom:6px;font-weight:600;">EcoScore</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;color:#0a2830;line-height:1;">87</span>
+            <span style="background:#F0B429;color:#fff;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;letter-spacing:.5px;">GOLD</span>
+          </div>
+          <div style="height:5px;background:#d1fae5;border-radius:3px;overflow:hidden;">
+            <div style="width:87%;height:100%;background:linear-gradient(90deg,#00C4A0,#2DB34A);border-radius:3px;"></div>
+          </div>
+        </div>
+
+        <!-- QR + signature row -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:12px;">
+          <div style="text-align:center;">
+            <svg viewBox="0 0 72 72" width="72" height="72" style="border:1px solid #ddd;padding:3px;border-radius:6px;display:block;">
+              <rect width="72" height="72" fill="white"/>
+              <rect x="6" y="6" width="18" height="18" rx="2" fill="#1A2A4A"/><rect x="9" y="9" width="12" height="12" fill="white"/><rect x="11" y="11" width="8" height="8" fill="#1A2A4A"/>
+              <rect x="48" y="6" width="18" height="18" rx="2" fill="#1A2A4A"/><rect x="51" y="9" width="12" height="12" fill="white"/><rect x="53" y="11" width="8" height="8" fill="#1A2A4A"/>
+              <rect x="6" y="48" width="18" height="18" rx="2" fill="#1A2A4A"/><rect x="9" y="51" width="12" height="12" fill="white"/><rect x="11" y="53" width="8" height="8" fill="#1A2A4A"/>
+              <rect x="30" y="6" width="4" height="4" fill="#1A2A4A"/><rect x="36" y="6" width="4" height="4" fill="#1A2A4A"/>
+              <rect x="6" y="30" width="4" height="4" fill="#1A2A4A"/><rect x="30" y="30" width="4" height="4" fill="#1A2A4A"/>
+              <rect x="36" y="30" width="4" height="4" fill="#1A2A4A"/><rect x="48" y="30" width="4" height="4" fill="#1A2A4A"/>
+              <rect x="30" y="36" width="4" height="4" fill="#1A2A4A"/><rect x="54" y="36" width="4" height="4" fill="#1A2A4A"/>
+              <rect x="30" y="48" width="4" height="4" fill="#1A2A4A"/><rect x="36" y="54" width="4" height="4" fill="#1A2A4A"/>
+              <rect x="48" y="48" width="4" height="4" fill="#1A2A4A"/><rect x="60" y="54" width="4" height="4" fill="#1A2A4A"/>
+            </svg>
+            <div style="font-size:9px;color:#aaa;margin-top:3px;">Scan to verify</div>
+          </div>
+          <div style="text-align:right;flex:1;min-width:0;">
+            <div style="width:80px;height:1px;background:#1A2A4A;margin-left:auto;margin-bottom:4px;"></div>
+            <div style="font-size:9px;color:#999;">Authorised Signature</div>
+            <div style="font-size:11px;font-weight:800;color:#1A2A4A;margin-top:2px;">Ozone Wash Pvt. Ltd.</div>
+            <div style="font-size:8px;color:#aaa;margin-top:2px;">VijRam Health Sense</div>
+          </div>
+        </div>
+
+        <!-- Valid until -->
+        <div style="text-align:center;margin-top:12px;padding:7px;background:#f0fdf9;border-radius:8px;border:1px solid #b2f0e0;">
+          <span style="font-size:10px;color:#00a37a;font-weight:700;">✅ Valid until: 15 Oct 2025</span>
+        </div>
+
+      </div>
+    </div><!-- /cert card -->
+
+    <div style="padding:14px 14px 32px;display:flex;gap:10px;width:390px;box-sizing:border-box;">
+      <button class="btn-primary" style="font-size:14px;">⬇️ Download PDF</button>
+      <button class="btn-secondary" style="font-size:14px;flex-shrink:0;width:90px;">🔗 Verify</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== CUSTOMER OTP START (customer shows this to field agent) ====== -->
+<div class="screen" id="cotp_start">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Start OTP</h2><div style="font-size:12px;color:var(--txt3);">Show this to the field agent</div></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px;gap:20px;">
+    <div style="background:rgba(0,196,160,.05);border:1px solid var(--e2);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;">
+      <div style="font-size:22px;flex-shrink:0;">👷</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.6;">Show this 4-digit code to your <strong style="color:var(--txt);">Ozone Wash agent</strong>. They'll enter it on their app to start cleaning.</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:16px;">Your Start OTP</div>
+      <div style="background:linear-gradient(135deg,#0a2830,#0d333c);border:2px solid var(--T);border-radius:24px;padding:32px;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(0,196,160,.06),transparent);"></div>
+        <div class="cotp-code" id="custStartOTP">7 4 2 9</div>
+        <div style="font-size:12px;color:var(--txt3);margin-top:14px;">Valid for this job only</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(240,180,41,.05);border:1px solid rgba(240,180,41,.15);border-radius:14px;padding:14px;">
+      <div style="font-size:18px;">⚠️</div>
+      <div style="font-size:12px;color:rgba(240,180,41,.8);">Do not share this code until the agent arrives at your location</div>
+    </div>
+    <div style="text-align:center;font-size:13px;color:var(--txt3);">Job <span class="mono" style="color:var(--T);">#OZW-2025-0042</span> · Overhead Tank 1000L</div>
+  </div>
+  <div style="padding:0 24px 40px;">
+    <button class="btn-secondary" onclick="goTo('home')">Back to Home</button>
+  </div>
+</div>
+
+<!-- ====== CUSTOMER OTP END (customer shows stop OTP to field agent) ====== -->
+<div class="screen" id="cotp_end">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('home')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Stop OTP</h2><div style="font-size:12px;color:var(--txt3);">Share to confirm job completion</div></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px;gap:20px;">
+    <div style="background:rgba(45,179,74,.05);border:1px solid rgba(45,179,74,.2);border-radius:16px;padding:16px;display:flex;gap:12px;align-items:flex-start;">
+      <div style="font-size:22px;flex-shrink:0;">✅</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.6;">Cleaning is <strong style="color:var(--G);">complete!</strong> Share this code with your agent to officially close the job and receive your certificate.</div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:16px;">Your Stop OTP</div>
+      <div style="background:linear-gradient(135deg,#081c14,#0b2a18);border:2px solid var(--G);border-radius:24px;padding:32px;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(45,179,74,.06),transparent);"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:600;color:var(--G);letter-spacing:12px;text-shadow:0 0 28px rgba(45,179,74,.5);animation:otpGlow2 2.5s ease-in-out infinite;" id="custEndOTP">3 8 1 5</div>
+        <div style="font-size:12px;color:var(--txt3);margin-top:14px;">Share only after you're satisfied with the cleaning</div>
+      </div>
+    </div>
+    <div class="card" style="padding:14px;display:flex;justify-content:space-between;">
+      <div><div style="font-size:11px;color:var(--txt3);">Service</div><div style="font-size:13px;font-weight:700;color:var(--txt);">Overhead Tank 1000L</div></div>
+      <div style="text-align:right;"><div style="font-size:11px;color:var(--txt3);">Amount</div><div class="mono" style="font-size:14px;font-weight:700;color:var(--T);">₹1,297</div></div>
+    </div>
+  </div>
+  <div style="padding:0 24px 40px;">
+    <button class="btn-secondary" onclick="goTo('home')">Back to Home</button>
+  </div>
+</div>
+
+<!-- ====== FIELD JOBS ====== -->
+<div class="screen" id="fjobs">
+  <div style="background:linear-gradient(180deg,var(--s1),var(--bg));padding:54px 24px 20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:12px;color:var(--txt3);">Welcome back,</div><h2>Suresh Kumar 👷</h2></div>
+      <div style="width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#071A1F;">SK</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <div class="stat-pill"><div class="mono" style="font-size:18px;font-weight:700;color:var(--T);">3</div><div style="font-size:11px;color:var(--txt3);">Today</div></div>
+      <div class="stat-pill"><div class="mono" style="font-size:18px;font-weight:700;color:var(--G);">2</div><div style="font-size:11px;color:var(--txt3);">Done</div></div>
+      <div class="stat-pill"><div class="mono" style="font-size:18px;font-weight:700;color:var(--gold);">₹2,997</div><div style="font-size:11px;color:var(--txt3);">Earned</div></div>
+    </div>
+  </div>
+
+  <div class="scroll-content">
+    <div class="section-label">TODAY'S JOBS</div>
+    <div class="job-card" onclick="goTo('fdet')">
+      <div class="jbar" style="background:var(--T);"></div>
+      <div style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="mono" style="font-size:11px;color:var(--txt3);">#OZW-2025-0042</div>
+          <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(0,196,160,.12);color:var(--T);">In Progress</span>
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:4px;">Ramesh Sappa</div>
+        <div style="font-size:13px;color:var(--txt3);margin-bottom:10px;">🏠 Madhura Nagar · 1000L Overhead</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:62%;"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;"><div style="font-size:12px;color:var(--txt3);">5/8 steps</div><div class="mono" style="font-size:12px;color:var(--txt3);">9:00 AM</div></div>
+      </div>
+    </div>
+    <div class="job-card" onclick="goTo('fdet')">
+      <div class="jbar" style="background:var(--G);"></div>
+      <div style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <div class="mono" style="font-size:11px;color:var(--txt3);">#OZW-2025-0041</div>
+          <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(34,197,94,.12);color:var(--mint);">Completed</span>
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:4px;">Priya Sharma</div>
+        <div style="font-size:13px;color:var(--txt3);margin-bottom:10px;">🏠 Banjara Hills · 500L Overhead</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:100%;"></div></div>
+      </div>
+    </div>
+    <div class="job-card">
+      <div class="jbar" style="background:var(--txt3);"></div>
+      <div style="padding:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+          <div class="mono" style="font-size:11px;color:var(--txt3);">#OZW-2025-0044</div>
+          <span style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(61,122,114,.2);color:var(--txt3);">Scheduled</span>
+        </div>
+        <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:4px;">Anil Reddy</div>
+        <div style="font-size:13px;color:var(--txt3);">🏠 Kondapur · 2000L Sump · <span class="mono">2:00 PM</span></div>
+      </div>
+    </div>
+    <div style="height:20px;"></div>
+  </div>
+  <div class="bottom-nav">
+    <div class="nav-item active"><div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="var(--T)" stroke-width="1.7"/><path d="M7 7H13M7 10H13M7 13H10" stroke="var(--T)" stroke-width="1.7" stroke-linecap="round"/></svg></div><span>Jobs</span></div>
+    <div class="nav-item" onclick="goTo('fmis')"><div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 15L7 9L11 12L15 6L18 9" stroke="var(--txt3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>Stats</span></div>
+  </div>
+</div>
+
+<!-- ====== FIELD JOB DETAIL ====== -->
+<div class="screen" id="fdet">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fjobs')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Job Detail</h2><div class="mono" style="font-size:12px;color:var(--txt3);">#OZW-2025-0042</div></div>
+    <span style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;background:rgba(0,196,160,.12);color:var(--T);">In Progress</span>
+  </div>
+  <div class="scroll-content">
+    <div class="map-mock" style="height:160px;">
+      <div class="map-grid"></div>
+      <div class="dest-pin" style="top:40%;left:46%;"></div>
+      <button style="position:absolute;bottom:10px;right:10px;background:var(--T);border:none;color:#071A1F;font-size:12px;font-weight:800;padding:7px 14px;border-radius:10px;cursor:pointer;font-family:Outfit,sans-serif;">🧭 Navigate</button>
+    </div>
+    <div class="section-label">CUSTOMER</div>
+    <div class="card" style="margin:0 16px 12px;padding:16px;">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="font-size:12px;color:var(--txt3);">Name</span><span style="font-weight:700;color:var(--txt);">Ramesh Sappa</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="font-size:12px;color:var(--txt3);">Phone</span><span class="mono" style="font-weight:600;color:var(--T);">+91 98765 43210</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="font-size:12px;color:var(--txt3);">Address</span><span style="font-weight:600;color:var(--txt);text-align:right;">Flat 4B, Madhura Nagar</span></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 12px;">
+      <div class="card" style="padding:12px;text-align:center;"><div style="font-size:18px;">🪣</div><div style="font-size:10px;color:var(--txt3);margin-top:4px;">Overhead</div></div>
+      <div class="card" style="padding:12px;text-align:center;"><div class="mono" style="font-size:16px;font-weight:700;color:var(--T);">1000L</div><div style="font-size:10px;color:var(--txt3);margin-top:4px;">Capacity</div></div>
+      <div class="card" style="padding:12px;text-align:center;"><div class="mono" style="font-size:15px;font-weight:700;color:var(--gold);">₹1,298</div><div style="font-size:10px;color:var(--txt3);margin-top:4px;">Amount</div></div>
+    </div>
+    <div class="section-label">ACTIONS</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px 24px;">
+      <div class="card" style="padding:16px;cursor:pointer;text-align:center;" onclick="goTo('fotp_start')"><div style="font-size:24px;margin-bottom:6px;">🔑</div><div style="font-size:13px;font-weight:700;color:var(--T);">Start Checklist</div></div>
+      <div class="card" style="padding:16px;cursor:pointer;text-align:center;" onclick="goTo('fincident')"><div style="font-size:24px;margin-bottom:6px;">⚠️</div><div style="font-size:13px;font-weight:700;color:var(--gold);">Report Issue</div></div>
+      <div class="card" style="padding:16px;cursor:pointer;text-align:center;" onclick="goTo('fcall')"><div style="font-size:24px;margin-bottom:6px;">📞</div><div style="font-size:13px;font-weight:700;color:var(--G);">Call Customer</div></div>
+      <div class="card" style="padding:16px;cursor:pointer;text-align:center;" onclick="goTo('fcl')"><div style="font-size:24px;margin-bottom:6px;">✅</div><div style="font-size:13px;font-weight:700;color:var(--txt2);">Checklist</div></div>
+      <div class="card" style="padding:16px;cursor:pointer;text-align:center;grid-column:1/-1;" onclick="goTo('ftransfer')"><div style="display:flex;align-items:center;justify-content:center;gap:10px;"><span style="font-size:22px;">🔄</span><span style="font-size:14px;font-weight:700;color:var(--txt2);">Transfer to Another Agent</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== FIELD OTP START (Agent enters OTP from customer) ====== -->
+<div class="screen" id="fotp_start">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fdet')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Enter Start OTP</h2><div style="font-size:12px;color:var(--txt3);">Ask customer for the 4-digit code</div></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px;gap:20px;">
+    <div style="background:rgba(0,196,160,.05);border:1px solid var(--e2);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;">
+      <div style="width:44px;height:44px;border-radius:14px;background:rgba(0,196,160,.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📱</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.6;">Ask <strong style="color:var(--txt);">Ramesh Sappa</strong> to open the <span style="color:var(--T);font-weight:700;">Ozone Wash app</span> and share the Start OTP with you</div>
+    </div>
+    <!-- OTP input boxes -->
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:14px;">Enter Customer's OTP</div>
+      <div style="display:flex;gap:12px;justify-content:center;" id="sotpBoxes">
+        <div class="otp-input-box" id="sb0">_</div>
+        <div class="otp-input-box" id="sb1">_</div>
+        <div class="otp-input-box" id="sb2">_</div>
+        <div class="otp-input-box" id="sb3">_</div>
+      </div>
+      <div style="font-size:12px;color:var(--red);text-align:center;margin-top:10px;min-height:18px;font-weight:600;" id="sotpErr"></div>
+    </div>
+    <!-- Numpad -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <div class="numpad-btn" onclick="otpKey('start',1)">1</div>
+      <div class="numpad-btn" onclick="otpKey('start',2)">2</div>
+      <div class="numpad-btn" onclick="otpKey('start',3)">3</div>
+      <div class="numpad-btn" onclick="otpKey('start',4)">4</div>
+      <div class="numpad-btn" onclick="otpKey('start',5)">5</div>
+      <div class="numpad-btn" onclick="otpKey('start',6)">6</div>
+      <div class="numpad-btn" onclick="otpKey('start',7)">7</div>
+      <div class="numpad-btn" onclick="otpKey('start',8)">8</div>
+      <div class="numpad-btn" onclick="otpKey('start',9)">9</div>
+      <div class="numpad-btn" onclick="otpKey('start','clr')" style="color:var(--txt3);font-size:18px;">⌫</div>
+      <div class="numpad-btn" onclick="otpKey('start',0)">0</div>
+      <div class="numpad-btn" style="background:rgba(0,196,160,.08);color:var(--T);font-size:13px;font-weight:700;" onclick="otpKey('start','ok')">OK</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== FIELD CHECKLIST ====== -->
+<div class="screen" id="fcl">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fdet')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Job Checklist</h2><div style="font-size:12px;color:var(--txt3);">Complete all 8 steps</div></div>
+  </div>
+  <div style="padding:0 24px 8px;">
+    <div class="progress-bar"><div class="progress-fill" id="clBar" style="width:62%;"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px;">
+      <div style="font-size:12px;color:var(--txt3);" id="clTxt">5 / 8 steps</div>
+      <div style="font-size:12px;color:var(--T);font-weight:700;" id="clPct">62%</div>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 24px;">
+    <div class="checklist-step"><div class="step-chk done">✓</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Initial Inspection & Setup</div><div style="font-size:12px;color:var(--txt3);">Site prep, equipment check</div></div><span class="chip teal" style="font-size:10px;padding:3px 8px;">Done</span></div>
+    <div class="checklist-step"><div class="step-chk done">✓</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Tank Draining</div><div style="font-size:12px;color:var(--txt3);">Complete water drainage</div></div><span class="chip teal" style="font-size:10px;padding:3px 8px;">Done</span></div>
+    <div class="checklist-step"><div class="step-chk done">✓</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Manual Scrubbing</div><div style="font-size:12px;color:var(--txt3);">Internal wall scrub</div></div><span class="chip teal" style="font-size:10px;padding:3px 8px;">Done</span></div>
+    <div class="checklist-step"><div class="step-chk done">✓</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Ozone / UV Treatment</div><div style="font-size:12px;color:var(--txt3);">Generator deployment</div></div><span class="chip teal" style="font-size:10px;padding:3px 8px;">Done</span></div>
+    <div class="checklist-step"><div class="step-chk done">✓</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Chemical Treatment</div><div style="font-size:12px;color:var(--txt3);">Anti-bacterial spray</div></div><span class="chip teal" style="font-size:10px;padding:3px 8px;">Done</span></div>
+    <div class="checklist-step" id="cs5" onclick="tapStep(5)"><div class="step-chk" id="ck5">6</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Microbial Testing</div><div style="font-size:12px;color:var(--txt3);">Tap to log completion</div></div><span class="chip" id="cc5" style="font-size:10px;padding:3px 8px;border:1px solid var(--e1);">Pending</span></div>
+    <div class="checklist-step" id="cs6" onclick="tapStep(6)"><div class="step-chk" id="ck6">7</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Refilling & Inspection</div><div style="font-size:12px;color:var(--txt3);">Tap to log completion</div></div><span class="chip" id="cc6" style="font-size:10px;padding:3px 8px;border:1px solid var(--e1);">Pending</span></div>
+    <div class="checklist-step" id="cs7" onclick="tapStep(7)" style="border-bottom:none;"><div class="step-chk" id="ck7">8</div><div style="flex:1;"><div style="font-weight:600;color:var(--txt);">Sign-off & Certificate</div><div style="font-size:12px;color:var(--txt3);">Tap to log completion</div></div><span class="chip" id="cc7" style="font-size:10px;padding:3px 8px;border:1px solid var(--e1);">Pending</span></div>
+    <div style="height:80px;"></div>
+  </div>
+  <div style="padding:16px 24px 32px;border-top:1px solid var(--e1);">
+    <button class="btn-primary" id="clBtn" style="opacity:.45;pointer-events:none;" onclick="goTo('fotp_end')">Complete Job →</button>
+  </div>
+</div>
+
+<!-- ====== FIELD OTP END (Agent enters stop OTP from customer) ====== -->
+<div class="screen" id="fotp_end">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fcl')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Enter Stop OTP</h2><div style="font-size:12px;color:var(--txt3);">Get the closure code from customer</div></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 24px;gap:18px;">
+    <!-- Job summary mini card -->
+    <div class="card" style="padding:14px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:11px;color:var(--txt3);">Job #OZW-2025-0042</div><div style="font-weight:700;color:var(--txt);margin-top:2px;">Overhead Tank 1000L</div></div>
+      <div class="mono" style="font-size:15px;font-weight:700;color:var(--T);">₹1,297 ✓</div>
+    </div>
+    <div style="background:rgba(0,196,160,.05);border:1px solid var(--e2);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:22px;flex-shrink:0;">📱</div>
+      <div style="font-size:13px;color:var(--txt2);line-height:1.6;">Ask <strong style="color:var(--txt);">Ramesh Sappa</strong> to open their app and share the <span style="color:var(--T);font-weight:700;">Stop OTP</span></div>
+    </div>
+    <!-- OTP input boxes -->
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:14px;">Enter Customer's Stop OTP</div>
+      <div style="display:flex;gap:12px;justify-content:center;" id="eotpBoxes">
+        <div class="otp-input-box" id="eb0">_</div>
+        <div class="otp-input-box" id="eb1">_</div>
+        <div class="otp-input-box" id="eb2">_</div>
+        <div class="otp-input-box" id="eb3">_</div>
+      </div>
+      <div style="font-size:12px;color:var(--red);text-align:center;margin-top:10px;min-height:18px;font-weight:600;" id="eotpErr"></div>
+    </div>
+    <!-- Numpad -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <div class="numpad-btn" onclick="otpKey('end',1)">1</div>
+      <div class="numpad-btn" onclick="otpKey('end',2)">2</div>
+      <div class="numpad-btn" onclick="otpKey('end',3)">3</div>
+      <div class="numpad-btn" onclick="otpKey('end',4)">4</div>
+      <div class="numpad-btn" onclick="otpKey('end',5)">5</div>
+      <div class="numpad-btn" onclick="otpKey('end',6)">6</div>
+      <div class="numpad-btn" onclick="otpKey('end',7)">7</div>
+      <div class="numpad-btn" onclick="otpKey('end',8)">8</div>
+      <div class="numpad-btn" onclick="otpKey('end',9)">9</div>
+      <div class="numpad-btn" onclick="otpKey('end','clr')" style="color:var(--txt3);font-size:18px;">⌫</div>
+      <div class="numpad-btn" onclick="otpKey('end',0)">0</div>
+      <div class="numpad-btn" style="background:rgba(0,196,160,.08);color:var(--T);font-size:13px;font-weight:700;" onclick="otpKey('end','ok')">OK</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== FIELD JOB DONE ====== -->
+<div class="screen" id="fjob_done">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px;text-align:center;">
+    <div class="success-ring"><div style="width:68px;height:68px;border-radius:50%;background:rgba(0,196,160,.2);display:flex;align-items:center;justify-content:center;font-size:30px;">✅</div></div>
+    <h1 style="margin-bottom:8px;">Job Complete!</h1>
+    <p style="margin-bottom:24px;">Certificate auto-generated and sent to customer on WhatsApp.</p>
+    <div class="card" style="width:100%;padding:20px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;">
+        <div><div style="font-size:10px;color:var(--txt3);">JOB ID</div><div class="mono" style="font-size:13px;font-weight:700;color:var(--T);">#OZW-0042</div></div>
+        <div><div style="font-size:10px;color:var(--txt3);">ECOSCORE</div><div style="font-size:13px;font-weight:700;color:var(--gold);">87 GOLD 🏆</div></div>
+        <div><div style="font-size:10px;color:var(--txt3);">AMOUNT</div><div class="mono" style="font-size:13px;font-weight:700;color:var(--T);">₹1,297</div></div>
+        <div><div style="font-size:10px;color:var(--txt3);">STATUS</div><div style="font-size:13px;font-weight:700;color:var(--mint);">Completed ✓</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="padding:0 24px 40px;display:flex;flex-direction:column;gap:10px;">
+    <button class="btn-primary" onclick="goTo('fmis')">View My Stats →</button>
+    <button class="btn-secondary" onclick="goTo('fjobs')">Back to Jobs</button>
+  </div>
+</div>
+
+<!-- ====== FIELD INCIDENT ====== -->
+<div class="screen" id="fincident">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fdet')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2>Report Incident</h2>
+  </div>
+  <div class="scroll-content">
+    <div class="section-label">SEVERITY</div>
+    <div style="display:flex;gap:8px;padding:0 24px 16px;">
+      <div class="sev-btn low on" id="sv0" onclick="selSev(0)">⚠️ Low</div>
+      <div class="sev-btn hi" id="sv1" onclick="selSev(1)">🔶 High</div>
+      <div class="sev-btn crit" id="sv2" onclick="selSev(2)">🚨 Critical</div>
+    </div>
+    <div class="section-label">DESCRIPTION</div>
+    <div style="padding:0 24px 16px;"><textarea style="width:100%;min-height:100px;background:var(--s2);border:1px solid var(--e2);border-radius:14px;color:var(--txt);font-family:Outfit,sans-serif;font-size:14px;padding:14px;resize:none;line-height:1.6;outline:none;" placeholder="Describe the incident..."></textarea></div>
+    <div class="section-label">PHOTOS (max 3)</div>
+    <div style="padding:0 24px 16px;"><div style="border:2px dashed var(--e2);border-radius:16px;padding:28px;text-align:center;cursor:pointer;background:var(--s2);"><div style="font-size:28px;margin-bottom:8px;">📷</div><div style="font-size:14px;font-weight:600;color:var(--txt2);">Tap to upload photos</div></div></div>
+    <div class="section-label">VOICE NOTE</div>
+    <div style="padding:0 24px 24px;"><div style="background:var(--s2);border:1px solid var(--e2);border-radius:16px;padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;"><div style="width:44px;height:44px;border-radius:14px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;font-size:20px;">🎤</div><div><div style="font-weight:600;color:var(--txt);">Record Voice Note</div><div style="font-size:12px;color:var(--txt3);">Tap and hold to record</div></div></div></div>
+  </div>
+  <div style="padding:0 24px 40px;">
+    <button style="background:linear-gradient(135deg,var(--red),#C23535);color:#fff;font-family:Outfit,sans-serif;font-size:16px;font-weight:800;border:none;border-radius:20px;height:56px;width:100%;cursor:pointer;box-shadow:0 8px 24px rgba(239,68,68,.3);" onclick="goTo('fdet')">Submit Incident Report</button>
+  </div>
+</div>
+
+<!-- ====== FIELD CALL ====== -->
+<div class="screen" id="fcall">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fdet')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2>Contact Customer</h2>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:32px;gap:20px;text-align:center;">
+    <div class="call-avatar">RS</div>
+    <div><div style="font-size:22px;font-weight:800;color:var(--txt);">Ramesh Sappa</div><div class="mono" style="font-size:15px;color:var(--txt2);margin-top:4px;">+91 98765 43210</div></div>
+    <div class="card" style="width:100%;padding:13px 16px;"><div style="font-size:11px;color:var(--txt3);">Job Reference</div><div class="mono" style="font-size:13px;font-weight:700;color:var(--T);">#OZW-2025-0042 · Overhead 1000L</div></div>
+    <div style="display:flex;gap:20px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div class="call-btn" style="background:rgba(45,179,74,.12);border:2px solid var(--G);">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M7 7C7 7 9 11 11 13C13 15 17 16 20 16L22 14L25 17C25 17 23 21 18 21C11 21 7 17 7 7Z" stroke="var(--G)" stroke-width="2" fill="rgba(45,179,74,.15)"/></svg>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:var(--G);">Call</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div class="call-btn" style="background:rgba(0,196,160,.12);border:2px solid var(--T);">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="7" width="20" height="14" rx="3" stroke="var(--T)" stroke-width="2" fill="rgba(0,196,160,.1)"/><path d="M4 7L14 15L24 7" stroke="var(--T)" stroke-width="2"/></svg>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:var(--T);">WhatsApp</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div class="call-btn" style="background:rgba(61,122,114,.2);border:2px solid var(--txt3);">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M7 7L21 21M7 21L21 7" stroke="var(--txt3)" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <span style="font-size:12px;font-weight:700;color:var(--txt3);">Cancel</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== FIELD STATS ====== -->
+<div class="screen" id="fmis">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fjobs')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <h2 style="flex:1;">My Performance</h2>
+    <!-- View toggle: Stats / Calendar -->
+    <div style="display:flex;background:var(--s2);border-radius:10px;border:1px solid var(--e1);overflow:hidden;">
+      <div id="vt0" onclick="switchMisView(0)" style="padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;background:var(--T);color:#071A1F;border-radius:8px;margin:2px;">📊</div>
+      <div id="vt1" onclick="switchMisView(1)" style="padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--txt3);">📅</div>
+    </div>
+  </div>
+
+  <!-- ── VIEW 0: STATS ── -->
+  <div id="misStats">
+    <div style="display:flex;gap:8px;padding:0 16px 12px;">
+      <button id="pb0" onclick="selPeriod(0)" style="flex:1;padding:7px;border-radius:10px;background:var(--T);color:#071A1F;border:none;font-family:Outfit,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">This Week</button>
+      <button id="pb1" onclick="selPeriod(1)" style="flex:1;padding:7px;border-radius:10px;background:var(--s2);color:var(--txt2);border:1px solid var(--e1);font-family:Outfit,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">Month</button>
+      <button id="pb2" onclick="selPeriod(2)" style="flex:1;padding:7px;border-radius:10px;background:var(--s2);color:var(--txt2);border:1px solid var(--e1);font-family:Outfit,sans-serif;font-size:12px;font-weight:600;cursor:pointer;">All Time</button>
+    </div>
+    <div class="scroll-content">
+      <div style="display:flex;justify-content:center;padding:8px 0 4px;">
+        <svg width="130" height="130" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="54" fill="none" stroke="var(--s2)" stroke-width="12"/>
+          <circle cx="70" cy="70" r="54" fill="none" stroke="url(#sg)" stroke-width="12" stroke-dasharray="339" stroke-dashoffset="44" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+          <text x="70" y="65" text-anchor="middle" fill="var(--txt)" font-family="JetBrains Mono" font-size="26" font-weight="700">87%</text>
+          <text x="70" y="83" text-anchor="middle" fill="var(--txt3)" font-family="Outfit" font-size="11">Completion</text>
+          <defs><linearGradient id="sg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00C4A0"/><stop offset="100%" stop-color="#2DB34A"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px 14px;">
+        <div class="kpi-card"><div class="mono" style="font-size:26px;font-weight:700;color:var(--T);" id="kj">18</div><div style="font-size:12px;color:var(--txt3);margin-top:4px;">Jobs Done</div></div>
+        <div class="kpi-card"><div class="mono" style="font-size:26px;font-weight:700;color:var(--G);" id="ke">₹22K</div><div style="font-size:12px;color:var(--txt3);margin-top:4px;">Earned</div></div>
+        <div class="kpi-card"><div class="mono" style="font-size:26px;font-weight:700;color:var(--gold);" id="kr">4.9 ⭐</div><div style="font-size:12px;color:var(--txt3);margin-top:4px;">Rating</div></div>
+        <div class="kpi-card"><div class="mono" style="font-size:26px;font-weight:700;color:var(--txt);" id="kec">87</div><div style="font-size:12px;color:var(--txt3);margin-top:4px;">EcoScore</div></div>
+      </div>
+      <div class="section-label">DAILY JOBS</div>
+      <div style="padding:0 16px 14px;">
+        <div class="card" style="padding:16px;">
+          <div style="display:flex;align-items:flex-end;gap:6px;height:74px;">
+            <div class="chart-bar"><div class="bar" style="height:50px;background:linear-gradient(180deg,var(--T),rgba(0,196,160,.3));"></div><span style="font-size:10px;color:var(--txt3);">M</span></div>
+            <div class="chart-bar"><div class="bar" style="height:72px;background:linear-gradient(180deg,var(--G),rgba(45,179,74,.3));"></div><span style="font-size:10px;color:var(--txt3);">T</span></div>
+            <div class="chart-bar"><div class="bar" style="height:42px;background:linear-gradient(180deg,var(--T),rgba(0,196,160,.3));"></div><span style="font-size:10px;color:var(--txt3);">W</span></div>
+            <div class="chart-bar"><div class="bar" style="height:64px;background:linear-gradient(180deg,var(--T),rgba(0,196,160,.3));"></div><span style="font-size:10px;color:var(--txt3);">T</span></div>
+            <div class="chart-bar"><div class="bar" style="height:56px;background:linear-gradient(180deg,var(--T),rgba(0,196,160,.3));"></div><span style="font-size:10px;color:var(--txt3);">F</span></div>
+            <div class="chart-bar"><div class="bar" style="height:30px;background:linear-gradient(180deg,var(--T),rgba(0,196,160,.3));"></div><span style="font-size:10px;color:var(--txt3);">S</span></div>
+            <div class="chart-bar"><div class="bar" style="height:18px;background:linear-gradient(180deg,var(--T),rgba(0,196,160,.3));"></div><span style="font-size:10px;color:var(--txt3);">S</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin:0 16px 20px;background:linear-gradient(135deg,rgba(240,180,41,.08),rgba(240,180,41,.04));border:1px solid rgba(240,180,41,.2);border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:space-between;">
+        <div><div style="font-size:14px;font-weight:700;color:var(--gold);">🔥 7-Day Streak!</div><div style="font-size:12px;color:var(--txt3);margin-top:2px;">No incidents this week</div></div>
+        <div class="mono" style="font-size:38px;font-weight:700;color:var(--gold);">7</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VIEW 1: CALENDAR ── -->
+  <div id="misCal" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <!-- Month nav -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 10px;">
+      <div onclick="calNav(-1)" style="width:36px;height:36px;border-radius:11px;background:var(--s2);border:1px solid var(--e1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--txt);">‹</div>
+      <div style="font-size:16px;font-weight:700;color:var(--txt);" id="calMonthLabel">March 2026</div>
+      <div onclick="calNav(1)" style="width:36px;height:36px;border-radius:11px;background:var(--s2);border:1px solid var(--e1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--txt);">›</div>
+    </div>
+    <!-- Day-of-week headers -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 16px;margin-bottom:4px;">
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">SU</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">MO</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">TU</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">WE</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">TH</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">FR</div>
+      <div style="text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:4px 0;">SA</div>
+    </div>
+    <!-- Calendar grid -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 16px;gap:3px;" id="calGrid"></div>
+    <!-- Status filter chips -->
+    <div style="display:flex;gap:8px;padding:12px 16px 8px;">
+      <div id="sf0" onclick="selStatusFilter(0)" style="flex:1;padding:7px 4px;border-radius:12px;background:var(--T);color:#071A1F;font-size:11px;font-weight:800;text-align:center;cursor:pointer;border:none;">All</div>
+      <div id="sf1" onclick="selStatusFilter(1)" style="flex:1;padding:7px 4px;border-radius:12px;background:var(--s2);border:1px solid var(--e1);color:var(--txt2);font-size:11px;font-weight:700;text-align:center;cursor:pointer;">✅ Done</div>
+      <div id="sf2" onclick="selStatusFilter(2)" style="flex:1;padding:7px 4px;border-radius:12px;background:var(--s2);border:1px solid var(--e1);color:var(--txt2);font-size:11px;font-weight:700;text-align:center;cursor:pointer;">🕐 Upcoming</div>
+      <div id="sf3" onclick="selStatusFilter(3)" style="flex:1;padding:7px 4px;border-radius:12px;background:var(--s2);border:1px solid var(--e1);color:var(--txt2);font-size:11px;font-weight:700;text-align:center;cursor:pointer;">❌ Cancelled</div>
+    </div>
+    <!-- Jobs list for selected date -->
+    <div style="flex:1;overflow-y:auto;scrollbar-width:none;padding:0 16px 16px;" id="calJobsList"></div>
+  </div>
+
+  <!-- Bottom nav kept same -->
+  <div class="bottom-nav" style="flex-shrink:0;">
+    <div class="nav-item" onclick="goTo('fjobs')"><div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="3" stroke="var(--txt3)" stroke-width="1.7"/><path d="M7 7H13M7 10H13M7 13H10" stroke="var(--txt3)" stroke-width="1.7" stroke-linecap="round"/></svg></div><span>Jobs</span></div>
+    <div class="nav-item active"><div class="nav-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 15L7 9L11 12L15 6L18 9" stroke="var(--T)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>Stats</span></div>
+  </div>
+</div>
+
+<!-- ====== FIELD JOB TRANSFER ====== -->
+<div class="screen" id="ftransfer">
+  <div class="topbar">
+    <div class="back-btn" onclick="goTo('fdet')"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8L10 13" stroke="var(--txt)" stroke-width="2" stroke-linecap="round"/></svg></div>
+    <div style="flex:1;"><h2>Transfer Job</h2><div class="mono" style="font-size:12px;color:var(--txt3);">#OZW-2025-0042</div></div>
+  </div>
+
+  <!-- Job being transferred -->
+  <div style="margin:0 16px 16px;background:rgba(240,180,41,.06);border:1px solid rgba(240,180,41,.18);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;">
+    <div style="font-size:24px;">🔄</div>
+    <div>
+      <div style="font-size:13px;font-weight:700;color:var(--txt);">Ramesh Sappa · Overhead 1000L</div>
+      <div style="font-size:12px;color:var(--txt3);">Today <span class="mono">9:00 AM</span> slot · transferring from <span style="color:var(--gold);">Suresh Kumar</span></div>
+    </div>
+  </div>
+
+  <!-- Reason -->
+  <div class="section-label">REASON FOR TRANSFER</div>
+  <div style="display:flex;flex-direction:column;gap:8px;padding:0 16px 14px;" id="tReasons">
+    <div class="t-reason sel" id="tr0" onclick="selReason(0)">🤒 Agent unwell / sick leave</div>
+    <div class="t-reason" id="tr1" onclick="selReason(1)">🚗 Agent stuck in traffic</div>
+    <div class="t-reason" id="tr2" onclick="selReason(2)">🔧 Equipment issue</div>
+    <div class="t-reason" id="tr3" onclick="selReason(3)">📋 Workload rebalance</div>
+    <div class="t-reason" id="tr4" onclick="selReason(4)">📝 Other reason</div>
+  </div>
+
+  <!-- Select agent -->
+  <div class="section-label">SELECT AGENT TO TRANSFER TO</div>
+  <div style="display:flex;flex-direction:column;gap:10px;padding:0 16px;flex:1;overflow-y:auto;scrollbar-width:none;">
+    <div class="agent-card" id="ag0" onclick="selAgent(0)">
+      <div style="width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#1E90D4,#1260A8);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;">RK</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;color:var(--txt);">Ravi Kumar</div>
+        <div style="font-size:12px;color:var(--txt3);">⭐ 4.8 · 2 jobs today · <span style="color:var(--G);font-weight:600;">Available</span></div>
+      </div>
+      <div class="agent-radio" id="ar0"></div>
+    </div>
+    <div class="agent-card" id="ag1" onclick="selAgent(1)">
+      <div style="width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--G),#1A7A30);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;">MR</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;color:var(--txt);">Mohan Reddy</div>
+        <div style="font-size:12px;color:var(--txt3);">⭐ 4.9 · 1 job today · <span style="color:var(--G);font-weight:600;">Available</span></div>
+      </div>
+      <div class="agent-radio" id="ar1"></div>
+    </div>
+    <div class="agent-card" id="ag2" onclick="selAgent(2)">
+      <div style="width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--gold),#A07010);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;">PV</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;color:var(--txt);">Prasad Varma</div>
+        <div style="font-size:12px;color:var(--txt3);">⭐ 4.7 · 3 jobs today · <span style="color:var(--gold);font-weight:600;">Busy</span></div>
+      </div>
+      <div class="agent-radio" id="ar2"></div>
+    </div>
+    <div class="agent-card" id="ag3" onclick="selAgent(3)">
+      <div style="width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#9333EA,#5B21B6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;">SK</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;color:var(--txt);">Santosh Kumar</div>
+        <div style="font-size:12px;color:var(--txt3);">⭐ 4.6 · 0 jobs today · <span style="color:var(--T);font-weight:600;">Free</span></div>
+      </div>
+      <div class="agent-radio" id="ar3"></div>
+    </div>
+    <div style="height:4px;"></div>
+  </div>
+
+  <div style="padding:12px 16px 32px;border-top:1px solid var(--e1);">
+    <button class="btn-primary" id="transferBtn" style="opacity:.4;pointer-events:none;" onclick="confirmTransfer()">Transfer Job</button>
+  </div>
+</div>
+
+<!-- TRANSFER SUCCESS MODAL overlay -->
+<div id="transferSuccessOverlay" style="display:none;position:absolute;inset:0;background:rgba(7,26,31,.85);z-index:50;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+  <div style="background:var(--s1);border-radius:28px;border:1px solid var(--e2);padding:32px 24px;margin:24px;text-align:center;animation:successRing .4s ease both;">
+    <div style="font-size:52px;margin-bottom:14px;">🔄</div>
+    <h2 style="margin-bottom:8px;">Job Transferred!</h2>
+    <p style="margin-bottom:20px;" id="transferSuccessMsg">Job assigned to Ravi Kumar. Notification sent.</p>
+    <button class="btn-primary" onclick="document.getElementById('transferSuccessOverlay').style.display='none';goTo('fjobs');">Back to Jobs</button>
+  </div>
+</div>
+
+
+<!-- INVOICE SCREEN -->
+<div class="screen" id="s-invoices">
+  <div style="display:flex;align-items:center;gap:12px;padding:54px 24px 12px;flex-shrink:0;">
+    <div onclick="goTo('home')" class="back-btn">
+      <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+    </div>
+    <div style="flex:1;">
+      <h2 style="font-size:20px;">My Invoices</h2>
+      <p style="font-size:11px;color:var(--txt3);">Tax invoices · 18% GST included</p>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+
+    <!-- Invoice 1 -->
+    <div class="card" style="margin-bottom:12px;overflow:hidden;">
+      <div style="height:3px;background:linear-gradient(90deg,var(--T3),var(--T));"></div>
+      <div style="padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div class="mono" style="font-size:10px;color:var(--T);">OZW-INV-2025-00042</div>
+            <h3 style="font-size:14px;margin-top:4px;">Overhead Tank 1000L</h3>
+            <p style="font-size:11px;">#OZW-0042 · 15 Jul 2025</p>
+          </div>
+          <div style="text-align:right;">
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--T);">₹2,015</div>
+            <p style="font-size:9px;margin-top:2px;">incl. 18% GST</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+          <div class="chip green">PAID ✓</div>
+          <div class="chip teal">WA Sent ✓</div>
+          <div class="chip blue">Email Sent ✓</div>
+        </div>
+        <!-- breakdown -->
+        <div style="background:var(--s2);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:11px;">
+          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e1);">
+            <span style="color:var(--txt2);">Overhead 1000L</span><span class="mono">₹999.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e1);">
+            <span style="color:var(--txt2);">UV Sterilization</span><span class="mono">₹499.00</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e1);">
+            <span style="color:var(--mint);">EcoScore 5% off</span><span class="mono" style="color:var(--mint);">−₹74.90</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e1);">
+            <span style="color:var(--txt3);">CGST 9% + SGST 9%</span><span class="mono" style="color:var(--txt3);">₹291.90</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0 2px;font-weight:700;">
+            <span>TOTAL</span><span class="mono" style="color:var(--T);font-size:13px;">₹2,015.00</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-primary" style="flex:1;font-size:12px;height:44px;" onclick="showToast('Downloading PDF...')">⬇️ PDF</button>
+          <div onclick="showToast('Resent to WhatsApp ✓')" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:0 14px;display:flex;align-items:center;cursor:pointer;font-size:18px;">💬</div>
+          <div onclick="showToast('Resent to Email ✓')" style="background:rgba(30,144,212,.1);border:1px solid rgba(30,144,212,.3);border-radius:14px;padding:0 14px;display:flex;align-items:center;cursor:pointer;font-size:18px;">📧</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice 2 -->
+    <div class="card" style="margin-bottom:12px;overflow:hidden;">
+      <div style="height:3px;background:linear-gradient(90deg,var(--T3),var(--T));"></div>
+      <div style="padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div class="mono" style="font-size:10px;color:var(--T);">OZW-INV-2025-00038</div>
+            <h3 style="font-size:14px;margin-top:4px;">Sump Cleaning 2000L</h3>
+            <p style="font-size:11px;">#OZW-0038 · 10 Jun 2025</p>
+          </div>
+          <div style="text-align:right;">
+            <div class="mono" style="font-size:20px;font-weight:700;color:var(--T);">₹1,534</div>
+            <p style="font-size:9px;margin-top:2px;">incl. 18% GST</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <div class="chip green">PAID ✓</div>
+          <div class="chip teal">WA Sent ✓</div>
+          <div class="chip blue">Email Sent ✓</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-primary" style="flex:1;font-size:12px;height:44px;" onclick="showToast('Downloading PDF...')">⬇️ PDF</button>
+          <div onclick="showToast('Resent to WhatsApp ✓')" style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:14px;padding:0 14px;display:flex;align-items:center;cursor:pointer;font-size:18px;">💬</div>
+          <div onclick="showToast('Resent to Email ✓')" style="background:rgba(30,144,212,.1);border:1px solid rgba(30,144,212,.3);border-radius:14px;padding:0 14px;display:flex;align-items:center;cursor:pointer;font-size:18px;">📧</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:16px;font-size:11px;color:var(--txt3);">
+      Auto-generated after every payment<br>
+      <span style="color:var(--T);">GST-compliant · CGST + SGST breakdown</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ ADMIN SCREENS ═══════════════ -->
+
+<!-- ADMIN DASHBOARD -->
+<div class="screen" id="a-dashboard">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:58px 20px 14px;flex-shrink:0;">
+    <div>
+      <p style="font-size:11px;color:var(--txt3);">Good morning,</p>
+      <h2 style="font-size:20px;">Ramesh Sappa 👋</h2>
+    </div>
+    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--bg);">RS</div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+    <!-- Stat strip -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div class="card" style="padding:14px;">
+        <p style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Today</p>
+        <div class="mono" style="font-size:28px;font-weight:700;color:var(--T);line-height:1.1;">12</div>
+        <p style="font-size:11px;color:var(--txt2);">Bookings</p>
+      </div>
+      <div class="card" style="padding:14px;">
+        <p style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Revenue</p>
+        <div class="mono" style="font-size:22px;font-weight:700;color:var(--gold);line-height:1.1;">₹18.4K</div>
+        <p style="font-size:11px;color:var(--txt2);">Today</p>
+      </div>
+      <div class="card" style="padding:14px;">
+        <p style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Agents</p>
+        <div class="mono" style="font-size:28px;font-weight:700;color:var(--B);line-height:1.1;">6</div>
+        <p style="font-size:11px;color:var(--txt2);">4 busy · 2 free</p>
+      </div>
+      <div class="card" style="padding:14px;">
+        <p style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;">Support</p>
+        <div class="mono" style="font-size:28px;font-weight:700;color:var(--red);line-height:1.1;">4</div>
+        <p style="font-size:11px;color:var(--txt2);">Open tickets</p>
+      </div>
+    </div>
+
+    <!-- Live jobs -->
+    <p class="section-label">LIVE JOBS</p>
+    <div class="card" style="margin-bottom:12px;">
+      <div onclick="adminNav('a-bookings')" style="padding:13px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:12px;cursor:pointer;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--T);flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:700;color:var(--txt);">Ramesh Sappa</div>
+          <div style="font-size:10px;color:var(--txt3);">#OZW-0042 · In Progress · Suresh Kumar</div>
+        </div>
+        <div class="chip teal" style="font-size:9px;">73%</div>
+      </div>
+      <div onclick="adminNav('a-bookings')" style="padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:700;color:var(--txt);">Anil Reddy</div>
+          <div style="font-size:10px;color:var(--red);">#OZW-0043 · Unassigned · Action needed</div>
+        </div>
+        <div onclick="event.stopPropagation();adminNav('a-agents',this)" class="chip red" style="font-size:9px;cursor:pointer;">Assign</div>
+      </div>
+    </div>
+
+    <!-- Support alert -->
+    <p class="section-label">SUPPORT QUEUE</p>
+    <div class="card" style="padding:14px 16px;margin-bottom:12px;display:flex;gap:12px;align-items:center;cursor:pointer;" onclick="adminNav('a-support')">
+      <div style="font-size:22px;">⚠️</div>
+      <div style="flex:1;">
+        <div style="font-size:12px;font-weight:700;color:var(--txt);">Priya Nair — Complaint</div>
+        <div style="font-size:10px;color:var(--txt3);">OZT-00043 · Agent arrived 45 min late</div>
+      </div>
+      <div class="chip red" style="font-size:9px;">P3</div>
+    </div>
+
+    <!-- Revenue mini chart -->
+    <p class="section-label">REVENUE — 7 DAYS</p>
+    <div class="card" style="padding:16px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--txt);margin-bottom:4px;">₹1,24,850</div>
+      <p style="font-size:10px;color:var(--G);margin-bottom:12px;">↑ 18% vs last week</p>
+      <div style="display:flex;align-items:flex-end;gap:5px;height:48px;">
+        <div style="flex:1;background:linear-gradient(180deg,var(--T),var(--T3));border-radius:3px 3px 0 0;height:52%;opacity:.7;"></div>
+        <div style="flex:1;background:linear-gradient(180deg,var(--T),var(--T3));border-radius:3px 3px 0 0;height:70%;opacity:.8;"></div>
+        <div style="flex:1;background:linear-gradient(180deg,var(--T),var(--T3));border-radius:3px 3px 0 0;height:45%;opacity:.7;"></div>
+        <div style="flex:1;background:linear-gradient(180deg,var(--T),var(--T3));border-radius:3px 3px 0 0;height:82%;opacity:.9;"></div>
+        <div style="flex:1;background:linear-gradient(180deg,var(--T),var(--T3));border-radius:3px 3px 0 0;height:65%;opacity:.8;"></div>
+        <div style="flex:1;background:linear-gradient(180deg,var(--gold),#a37200);border-radius:3px 3px 0 0;height:95%;"></div>
+        <div style="flex:1;background:linear-gradient(180deg,var(--gold),#a37200);border-radius:3px 3px 0 0;height:100%;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:9px;color:var(--txt3);font-family:'JetBrains Mono',monospace;">
+        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span style="color:var(--gold);">S</span><span style="color:var(--gold);">S</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN BOOKINGS -->
+<div class="screen" id="a-bookings">
+  <div style="padding:58px 20px 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div onclick="adminNav('a-dashboard')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <h2 style="font-size:20px;">Bookings</h2>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">
+      <div style="padding:5px 14px;border-radius:20px;background:rgba(0,196,160,.12);border:1px solid rgba(0,196,160,.3);color:var(--T);font-size:11px;font-weight:700;white-space:nowrap;">All (6)</div>
+      <div style="padding:5px 14px;border-radius:20px;border:1px solid var(--e1);color:var(--txt3);font-size:11px;font-weight:700;white-space:nowrap;">In Progress</div>
+      <div style="padding:5px 14px;border-radius:20px;border:1px solid var(--e1);color:var(--txt3);font-size:11px;font-weight:700;white-space:nowrap;">Confirmed</div>
+      <div style="padding:5px 14px;border-radius:20px;border:1px solid var(--e1);color:var(--txt3);font-size:11px;font-weight:700;white-space:nowrap;">Completed</div>
+    </div>
+    <!-- booking rows -->
+    <div class="card" style="overflow:hidden;">
+      <div onclick="showToast('Booking detail: #OZW-0042')" style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <div style="width:4px;height:36px;background:var(--T);border-radius:2px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Ramesh Sappa</span><span class="chip teal" style="font-size:9px;">In Progress</span></div>
+          <div style="font-size:10px;color:var(--txt3);margin-top:2px;">#OZW-0042 · Overhead 1000L · Suresh Kumar</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);margin-top:3px;">₹2,015</div>
+        </div>
+      </div>
+      <div onclick="showToast('Assigning agent to #OZW-0043')" style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:10px;cursor:pointer;background:rgba(239,68,68,.03);">
+        <div style="width:4px;height:36px;background:var(--red);border-radius:2px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Anil Reddy</span><span class="chip red" style="font-size:9px;">Unassigned!</span></div>
+          <div style="font-size:10px;color:var(--txt3);margin-top:2px;">#OZW-0043 · Sump 2000L · Today 1–3 PM</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);margin-top:3px;">₹1,679</div>
+        </div>
+      </div>
+      <div onclick="showToast('Booking: #OZW-0044')" style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <div style="width:4px;height:36px;background:var(--B);border-radius:2px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Priya Nair</span><span class="chip blue" style="font-size:9px;">En Route</span></div>
+          <div style="font-size:10px;color:var(--txt3);margin-top:2px;">#OZW-0044 · Overhead 500L · Ravi Kumar</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);margin-top:3px;">₹979</div>
+        </div>
+      </div>
+      <div onclick="showToast('Booking: #OZW-0041 completed')" style="padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <div style="width:4px;height:36px;background:var(--G);border-radius:2px;flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Deepa Sharma</span><span class="chip green" style="font-size:9px;">Completed ✓</span></div>
+          <div style="font-size:10px;color:var(--txt3);margin-top:2px;">#OZW-0041 · Overhead 1000L · Kiran Babu</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);margin-top:3px;">₹1,297</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN AGENTS -->
+<div class="screen" id="a-agents">
+  <div style="padding:58px 20px 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div onclick="adminNav('a-dashboard')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <h2 style="font-size:20px;">Field Agents</h2>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+    <div class="card" style="overflow:hidden;">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showToast('Suresh Kumar — In Job')">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);font-family:'Outfit',sans-serif;flex-shrink:0;">SK</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--txt);">Suresh Kumar</div><div style="font-size:10px;color:var(--txt3);">📍 Jubilee Hills · ⭐ 4.9 · Job: #OZW-0042</div></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;"></div>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showToast('Ravi Kumar — En Route')">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);font-family:'Outfit',sans-serif;flex-shrink:0;">RK</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--txt);">Ravi Kumar</div><div style="font-size:10px;color:var(--txt3);">📍 Banjara Hills · ⭐ 4.8 · En route</div></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--gold);flex-shrink:0;"></div>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showToast('Kiran Babu — Available')">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);font-family:'Outfit',sans-serif;flex-shrink:0;">KB</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--txt);">Kiran Babu</div><div style="font-size:10px;color:var(--txt3);">📍 Madhapur · ⭐ 4.7 · Available</div></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--G);flex-shrink:0;"></div>
+      </div>
+      <div style="padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;" onclick="showToast('Rajesh Nair — Available')">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--bg);font-family:'Outfit',sans-serif;flex-shrink:0;">RN</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--txt);">Rajesh Nair</div><div style="font-size:10px;color:var(--txt3);">📍 Kondapur · ⭐ 4.9 · Available</div></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--G);flex-shrink:0;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN SUPPORT CHAT -->
+<div class="screen" id="a-support">
+  <div style="padding:58px 20px 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div onclick="adminNav('a-dashboard')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <div style="flex:1;"><h2 style="font-size:20px;">Support Chat</h2></div>
+      <div class="chip red">4 open</div>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 0 80px;">
+    <div onclick="adminNav('a-support-chat')" style="padding:13px 20px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:flex-start;cursor:pointer;position:relative;">
+      <div style="position:absolute;left:0;top:10px;bottom:10px;width:3px;background:var(--T);border-radius:0 2px 2px 0;"></div>
+      <div style="font-size:22px;">⚠️</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Priya Nair</span><span style="font-size:10px;color:var(--txt3);">2h ago</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">OZT-00043 · Complaint · P3</div>
+        <div style="font-size:11px;color:var(--txt3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Agent arrived 45 minutes late...</div>
+      </div>
+      <div style="width:18px;height:18px;border-radius:50%;background:var(--T);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--bg);flex-shrink:0;">1</div>
+    </div>
+    <div onclick="adminNav('a-support-chat')" style="padding:13px 20px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:flex-start;cursor:pointer;position:relative;">
+      <div style="position:absolute;left:0;top:10px;bottom:10px;width:3px;background:var(--T);border-radius:0 2px 2px 0;"></div>
+      <div style="font-size:22px;">💳</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Ramesh Sappa</span><span style="font-size:10px;color:var(--txt3);">5m ago</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">OZT-00044 · Payment · P2</div>
+        <div style="font-size:11px;color:var(--txt3);">GST invoice not received yet</div>
+      </div>
+      <div style="width:18px;height:18px;border-radius:50%;background:var(--T);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--bg);flex-shrink:0;">2</div>
+    </div>
+    <div onclick="showToast('OZT-00042 — Reschedule')" style="padding:13px 20px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:flex-start;cursor:pointer;">
+      <div style="font-size:22px;">📅</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span style="font-size:12px;font-weight:700;color:var(--txt);">Anil Reddy</span><span style="font-size:10px;color:var(--txt3);">3h ago</span></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">OZT-00042 · In Progress</div>
+        <div style="font-size:11px;color:var(--txt3);">Reschedule confirmed ✓</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN SUPPORT CHAT THREAD -->
+<div class="screen" id="a-support-chat">
+  <div style="padding:54px 20px 12px;border-bottom:1px solid var(--e1);flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div onclick="adminNav('a-support')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">OZT-00043</span>
+          <div class="chip red" style="font-size:9px;">Complaint</div>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:var(--txt);">Priya Nair</div>
+      </div>
+      <button onclick="showToast('Ticket resolved ✓')" style="background:rgba(0,196,160,.12);border:1px solid var(--e2);border-radius:8px;padding:6px 12px;font-size:10px;font-weight:700;color:var(--T);cursor:pointer;">✓ Resolve</button>
+    </div>
+  </div>
+  <!-- Messages -->
+  <div style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;scrollbar-width:none;">
+    <!-- Bot -->
+    <div style="display:flex;justify-content:center;">
+      <div style="background:var(--s2);border:1px solid var(--e1);border-radius:12px;padding:8px 12px;max-width:80%;font-size:11px;color:var(--txt2);font-style:italic;">🤖 Ticket OZT-00043 created. Escalated as high priority.</div>
+    </div>
+    <!-- Customer -->
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <div style="width:26px;height:26px;border-radius:8px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--T);flex-shrink:0;">P</div>
+      <div>
+        <div style="font-size:9px;color:var(--txt3);margin-bottom:2px;">Priya Nair · 2h ago</div>
+        <div style="background:var(--s3);border:1px solid var(--e1);border-radius:12px 12px 12px 2px;padding:10px 12px;max-width:200px;font-size:12px;color:var(--txt);line-height:1.5;">My booking was for 7–9 AM and the agent arrived at 9:45 AM. This is unacceptable!</div>
+      </div>
+    </div>
+    <!-- Admin reply -->
+    <div style="display:flex;gap:8px;align-items:flex-end;flex-direction:row-reverse;">
+      <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--T),var(--T3));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--bg);flex-shrink:0;">RS</div>
+      <div>
+        <div style="font-size:9px;color:var(--txt3);margin-bottom:2px;text-align:right;">Ramesh · 1h ago</div>
+        <div style="background:linear-gradient(135deg,rgba(0,196,160,.15),rgba(0,100,82,.2));border:1px solid rgba(0,196,160,.2);border-radius:12px 12px 2px 12px;padding:10px 12px;max-width:200px;font-size:12px;color:var(--txt);line-height:1.5;">Sincerely sorry! We are investigating with the agent. Your next cleaning will have 15% discount.</div>
+      </div>
+    </div>
+  </div>
+  <!-- Reply bar -->
+  <div style="padding:10px 14px 28px;border-top:1px solid var(--e1);display:flex;gap:8px;align-items:center;flex-shrink:0;">
+    <div style="flex:1;background:var(--s2);border:1px solid var(--e2);border-radius:12px;padding:10px 14px;display:flex;gap:8px;align-items:center;">
+      <input type="text" placeholder="Reply to customer..." id="adminReplyInput" style="flex:1;background:transparent;border:none;outline:none;font-family:'Outfit',sans-serif;font-size:13px;color:var(--txt);" onkeydown="if(event.key==='Enter')adminSendReply()">
+      <div onclick="adminSendReply()" style="width:30px;height:30px;border-radius:9px;background:var(--T);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#071A1F" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </div>
+    </div>
+    <div onclick="showToast('Sent via WhatsApp ✓')" style="width:38px;height:38px;border-radius:10px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;">💬</div>
+  </div>
+</div>
+
+<!-- ADMIN INVOICES -->
+<div class="screen" id="a-invoices">
+  <div style="padding:58px 20px 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div onclick="adminNav('a-dashboard')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <h2 style="font-size:20px;">Invoices</h2>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div class="card" style="padding:12px;"><p style="font-size:10px;color:var(--txt3);">GENERATED</p><div class="mono" style="font-size:24px;font-weight:700;color:var(--T);">342</div></div>
+      <div class="card" style="padding:12px;"><p style="font-size:10px;color:var(--txt3);">DELIVERY RATE</p><div class="mono" style="font-size:24px;font-weight:700;color:var(--G);">93%</div></div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+      <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:8px 14px;background:var(--s2);font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--e1);">
+        <span>INVOICE</span><span>AMT</span><span>WA</span><span>EMAIL</span>
+      </div>
+      <div onclick="showToast('Invoice PDF: OZW-INV-2025-00042')" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:10px 14px;border-bottom:1px solid var(--e1);align-items:center;cursor:pointer;">
+        <div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">…00042</div><div style="font-size:11px;color:var(--txt);">Ramesh Sappa</div></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);">₹2,015</span>
+        <span style="font-size:14px;">✅</span><span style="font-size:14px;">✅</span>
+      </div>
+      <div onclick="showToast('Invoice PDF: OZW-INV-2025-00041')" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:10px 14px;border-bottom:1px solid var(--e1);align-items:center;cursor:pointer;">
+        <div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">…00041</div><div style="font-size:11px;color:var(--txt);">Priya Nair</div></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);">₹979</span>
+        <span style="font-size:14px;">✅</span><span style="font-size:14px;">✅</span>
+      </div>
+      <div onclick="showToast('Invoice PDF: OZW-INV-2025-00040')" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;padding:10px 14px;align-items:center;cursor:pointer;">
+        <div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--T);">…00040</div><div style="font-size:11px;color:var(--txt);">Anil Reddy</div></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--T);">₹1,534</span>
+        <span style="font-size:14px;">✅</span><span style="font-size:14px;">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN AMC -->
+<div class="screen" id="a-amc">
+  <div style="padding:58px 20px 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div onclick="adminNav('a-dashboard')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <h2 style="font-size:20px;">AMC Subscriptions</h2>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+    <div style="background:rgba(0,196,160,.06);border:1px solid rgba(0,196,160,.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;justify-content:space-between;">
+      <div><div style="font-size:11px;color:var(--txt3);">ACTIVE AMCs</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--T);">47</div></div>
+      <div style="text-align:right;"><div style="font-size:11px;color:var(--txt3);">RENEWAL DUE</div><div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--gold);">8</div></div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+      <div onclick="showToast('AMC: AMC-00042 — Priya Nair')" style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:center;cursor:pointer;">
+        <div style="font-size:20px;">🏅</div>
+        <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--txt);">Priya Nair</div><div style="font-size:10px;color:var(--txt3);">AMC-00042 · Quarterly · 2/4 cleans used</div></div>
+        <div class="chip green" style="font-size:9px;">Active</div>
+      </div>
+      <div onclick="showToast('Renewal reminder sent to Ramesh Sappa ✓')" style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:center;cursor:pointer;">
+        <div style="font-size:20px;">🏅</div>
+        <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--txt);">Ramesh Sappa</div><div style="font-size:10px;color:var(--gold);">AMC-00041 · Expires in 44 days ⏰</div></div>
+        <div class="chip gold" style="font-size:9px;">Remind</div>
+      </div>
+      <div onclick="showToast('AMC: AMC-00039 — Lakshmi Devi')" style="padding:12px 16px;display:flex;gap:12px;align-items:center;cursor:pointer;">
+        <div style="font-size:20px;">🏅</div>
+        <div style="flex:1;"><div style="font-size:12px;font-weight:700;color:var(--txt);">Lakshmi Devi</div><div style="font-size:10px;color:var(--txt3);">AMC-00039 · Biannual · 1/2 cleans used</div></div>
+        <div class="chip green" style="font-size:9px;">Active</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN ONBOARDING -->
+<div class="screen" id="a-onboarding">
+  <div style="padding:58px 20px 12px;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div onclick="adminNav('a-dashboard')" class="back-btn">
+        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M10 4l-5 4 5 4"/></svg>
+      </div>
+      <div style="flex:1;"><h2 style="font-size:20px;">Agent Onboarding</h2></div>
+      <div class="chip gold">3 pending</div>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:0 16px 80px;">
+    <div class="card" style="overflow:hidden;">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:flex-start;cursor:pointer;">
+        <div style="width:38px;height:38px;border-radius:11px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">👷</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--txt);">Rajesh Kumar</div>
+          <div style="font-size:10px;color:var(--txt3);">Gachibowli · 3 yrs exp · Aadhaar ✅ PAN ✅</div>
+        </div>
+        <div style="display:flex;gap:5px;">
+          <button onclick="showToast('Rajesh Kumar Approved ✅ WhatsApp sent')" style="background:rgba(45,179,74,.12);border:1px solid rgba(45,179,74,.3);border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--G);cursor:pointer;">Approve</button>
+          <button onclick="showToast('Rejected. Reason sent via WhatsApp')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--red);cursor:pointer;">Reject</button>
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--e1);display:flex;gap:12px;align-items:flex-start;cursor:pointer;">
+        <div style="width:38px;height:38px;border-radius:11px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">👷</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--txt);">Ramu Yadav</div>
+          <div style="font-size:10px;color:var(--txt3);">Jubilee Hills · 4 yrs exp · Aadhaar ✅ PAN ✅</div>
+        </div>
+        <div style="display:flex;gap:5px;">
+          <button onclick="showToast('Ramu Yadav Approved ✅')" style="background:rgba(45,179,74,.12);border:1px solid rgba(45,179,74,.3);border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--G);cursor:pointer;">Approve</button>
+          <button onclick="showToast('Rejected')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--red);cursor:pointer;">Reject</button>
+        </div>
+      </div>
+      <div style="padding:12px 16px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;">
+        <div style="width:38px;height:38px;border-radius:11px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">👷</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:700;color:var(--txt);">Sai Teja</div>
+          <div style="font-size:10px;color:var(--red);">Madhapur · 1 yr exp · Aadhaar ✅ PAN ❌ missing</div>
+        </div>
+        <div class="chip red" style="font-size:9px;">Docs Pending</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- phone-wrap -->
+
+<script>
+// ===== STATE =====
+const ST={tankType:0,tankSize:0,dateIdx:1,slotIdx:3,addons:[1],payMethod:0};
+const basePx=[799,999,1299,1999];
+const addonPx=[299,499,199,149,349];
+const addonNames=['Lime Descaling','UV Sterilization','Microbial Test','Tank Health Check','Anti-Algae Treatment'];
+const tankNames=['Overhead Tank','Underground Sump','Syntax Tank'];
+const sizeNames=['500L','1000L','2000L','5000L'];
+const slots=['7–9 AM','9–11 AM','11–1 PM','1–3 PM','3–5 PM','5–7 PM','7–9 PM','9–11 PM'];
+const dnames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+let clDone=[true,true,true,true,true,false,false,false];
+
+function getTotal(){return basePx[ST.tankSize]+ST.addons.reduce((s,i)=>s+addonPx[i],0);}
+function getTotDisc(){return Math.round(getTotal()*.95);}
+function fm(n){return '₹'+n.toLocaleString('en-IN');}
+function otp(){return Math.floor(1000+Math.random()*9000).toString().split('').join(' ');}
+
+// ===== NAV =====
+function goTo(id){
+  document.querySelector('.screen.active')?.classList.remove('active');
+  const s=document.getElementById(id);
+  if(!s)return;
+  s.style.display='flex';
+  s.classList.add('active','slide-in');
+  setTimeout(()=>s.classList.remove('slide-in'),300);
+  if(id==='bk1')renderBk1();
+  if(id==='bk2')renderBk2();
+  if(id==='bk3')renderBk3();
+  if(id==='bk4')renderBk4();
+  if(id==='fotp_start'){otpState.start=[];renderOTPBoxes('start');}
+  if(id==='fotp_end'){otpState.end=[];renderOTPBoxes('end');}
+  if(id==='fmis'){switchMisView(0);}
+  if(id==='ftransfer'){tAgent=-1;tReason=0;selReason(0);checkTransferReady();}
+}
+
+// ===== BOOKING =====
+function renderBk1(){
+  [0,1,2].forEach(i=>{
+    const t=document.getElementById('tt'+i),r=document.getElementById('tr'+i);
+    t.className='tank-option'+(i===ST.tankType?' sel':'');
+    r.innerHTML=i===ST.tankType?'':'';
+    if(i===ST.tankType)r.style.borderColor='var(--T)'; else r.style.borderColor='var(--txt3)';
+    if(i===ST.tankType){r.innerHTML='<div style="width:10px;height:10px;border-radius:5px;background:var(--T)"></div>';}
+  });
+  [0,1,2,3].forEach(i=>document.getElementById('sc'+i).className='size-chip'+(i===ST.tankSize?' sel':''));
+  document.getElementById('bkP1').textContent=fm(basePx[ST.tankSize]);
+}
+function selTank(i){ST.tankType=i;renderBk1();}
+function selSize(i){ST.tankSize=i;renderBk1();}
+
+function renderBk2(){
+  const now=new Date();
+  const dc=document.getElementById('dateRow');dc.innerHTML='';
+  for(let i=0;i<6;i++){
+    const d=new Date(now);d.setDate(d.getDate()+i);
+    const div=document.createElement('div');
+    div.className='date-chip'+(i===ST.dateIdx?' sel':'');
+    div.innerHTML=`<div class="day">${dnames[d.getDay()]}</div><div class="num">${d.getDate()}</div>`;
+    div.onclick=()=>{ST.dateIdx=i;renderBk2();};
+    dc.appendChild(div);
+  }
+  const sg=document.getElementById('slotRow');sg.innerHTML='';
+  slots.forEach((s,i)=>{
+    const div=document.createElement('div');
+    div.className='slot-chip'+(i===ST.slotIdx?' sel':'');
+    div.innerHTML=`<span>${s}</span>`;
+    div.onclick=()=>{ST.slotIdx=i;renderBk2();};
+    sg.appendChild(div);
+  });
+  const d2=new Date(now);d2.setDate(d2.getDate()+ST.dateIdx);
+  const dn=ST.dateIdx===0?'Today':ST.dateIdx===1?'Tomorrow':dnames[d2.getDay()]+' '+d2.getDate();
+  document.getElementById('slotSummary').textContent=dn+' · '+slots[ST.slotIdx];
+  document.getElementById('bkP2').textContent=fm(getTotal());
+}
+
+function renderBk3(){
+  [0,1,2,3,4].forEach(i=>document.getElementById('cb'+i).className='checkbox'+(ST.addons.includes(i)?' on':''));
+  document.getElementById('bkP3').textContent=fm(getTotal());
+}
+function togAddon(i){
+  const idx=ST.addons.indexOf(i);
+  if(idx===-1)ST.addons.push(i);else ST.addons.splice(idx,1);
+  renderBk3();
+}
+
+function renderBk4(){
+  const now=new Date();const d2=new Date(now);d2.setDate(d2.getDate()+ST.dateIdx);
+  const dn=ST.dateIdx===0?'Today':ST.dateIdx===1?'Tomorrow':dnames[d2.getDay()]+' '+d2.getDate();
+  document.getElementById('rv0').textContent=tankNames[ST.tankType]+' · '+sizeNames[ST.tankSize];
+  document.getElementById('rv1').textContent=dn;
+  document.getElementById('rv2').textContent=slots[ST.slotIdx];
+  document.getElementById('rv3').textContent=ST.addons.length?ST.addons.map(i=>addonNames[i]).join(', '):'None';
+  document.getElementById('rv4').textContent=fm(basePx[ST.tankSize]);
+  const ex=ST.addons.reduce((s,i)=>s+addonPx[i],0);
+  document.getElementById('rv5').textContent=fm(ex);
+  document.getElementById('rv6').textContent='−'+fm(Math.round(getTotal()*.05));
+  document.getElementById('rv7').textContent=fm(getTotDisc());
+  document.getElementById('camt').textContent=fm(getTotDisc());
+}
+function selPay(i){
+  ST.payMethod=i;
+  [0,1,2].forEach(j=>{
+    document.getElementById('pm'+j).className='pay-card'+(j===i?' sel':'');
+    const r=document.getElementById('pmr'+j);
+    if(j===i){r.style.borderColor='var(--T)';r.innerHTML='<div style="width:9px;height:9px;border-radius:50%;background:var(--T);"></div>';}
+    else{r.style.borderColor='var(--txt3)';r.innerHTML='';}
+  });
+}
+
+// ===== CHECKLIST =====
+function tapStep(n){
+  if(clDone[n])return;
+  clDone[n]=true;
+  document.getElementById('ck'+n).className='step-chk done';
+  document.getElementById('ck'+n).textContent='✓';
+  document.getElementById('cc'+n).className='chip teal';
+  document.getElementById('cc'+n).textContent='Done ✓';
+  document.getElementById('cc'+n).style.border='none';
+  const done=clDone.filter(Boolean).length;
+  const pct=Math.round(done/8*100);
+  document.getElementById('clBar').style.width=pct+'%';
+  document.getElementById('clTxt').textContent=done+' / 8 steps';
+  document.getElementById('clPct').textContent=pct+'%';
+  if(done===8){const b=document.getElementById('clBtn');b.style.opacity='1';b.style.pointerEvents='auto';}
+}
+
+// ===== SEVERITY =====
+function selSev(i){
+  const cls=['low','hi','crit'];
+  [0,1,2].forEach(j=>{document.getElementById('sv'+j).className='sev-btn '+cls[j]+(j===i?' on':'');});
+}
+
+// ===== STATS PERIOD =====
+const pdata={0:{j:18,e:'₹22K',r:'4.9 ⭐',ec:87},1:{j:74,e:'₹91K',r:'4.8 ⭐',ec:85},2:{j:312,e:'₹3.8L',r:'4.9 ⭐',ec:87}};
+function selPeriod(i){
+  [0,1,2].forEach(j=>{
+    const b=document.getElementById('pb'+j);
+    if(j===i){b.style.background='var(--T)';b.style.color='#071A1F';b.style.border='none';}
+    else{b.style.background='var(--s2)';b.style.color='var(--txt2)';b.style.border='1px solid var(--e1)';}
+  });
+  const d=pdata[i];
+  document.getElementById('kj').textContent=d.j;
+  document.getElementById('ke').textContent=d.e;
+  document.getElementById('kr').textContent=d.r;
+  document.getElementById('kec').textContent=d.ec;
+}
+
+// ===== ROLE TOGGLE =====
+let isField=false;
+function toggleRole(){
+  isField=!isField;
+  document.getElementById('roleBtn').textContent=isField?'👤 Customer':'👷 Field View';
+  goTo(isField?'fjobs':'home');
+}
+
+// ===== SHARED OTP STATE =====
+// Single source of truth — generated once per "active job", shared across both apps
+const sharedOTP = {
+  start: String(Math.floor(1000+Math.random()*9000)),
+  end:   String(Math.floor(1000+Math.random()*9000))
+};
+// Format for display: "7 4 2 9"
+function dispOTP(str){ return str.split('').join(' '); }
+
+// Set customer OTP display screens
+function initCustomerOTPs(){
+  document.getElementById('custStartOTP').textContent = dispOTP(sharedOTP.start);
+  document.getElementById('custEndOTP').textContent   = dispOTP(sharedOTP.end);
+}
+
+// ===== OTP NUMPAD (Field agent entry) =====
+const otpState = { start:[], end:[] };
+
+function renderOTPBoxes(side){
+  const st = otpState[side];
+  const pfx = side==='start' ? 's' : 'e';
+  for(let i=0;i<4;i++){
+    const box = document.getElementById(pfx+'b'+i);
+    if(!box) continue;
+    if(i < st.length){
+      box.textContent = st[i];
+      box.className = 'otp-input-box filled';
+    } else {
+      box.textContent = '_';
+      box.className = 'otp-input-box' + (i===st.length?' active':'');
+    }
+  }
+  const errEl = document.getElementById(pfx==='s'?'sotpErr':'eotpErr');
+  if(errEl) errEl.textContent = '';
+}
+
+function otpKey(side, val){
+  const st = otpState[side];
+  if(val==='clr'){
+    if(st.length>0) st.pop();
+    renderOTPBoxes(side);
+    return;
+  }
+  if(val==='ok'){
+    checkOTP(side);
+    return;
+  }
+  if(st.length<4){
+    st.push(String(val));
+    renderOTPBoxes(side);
+    if(st.length===4) checkOTP(side);
+  }
+}
+
+function checkOTP(side){
+  const st = otpState[side];
+  if(st.length<4) return;
+  const entered = st.join('');
+  const correct = side==='start' ? sharedOTP.start : sharedOTP.end;
+  const pfx = side==='start' ? 's' : 'e';
+  const errEl = document.getElementById(pfx+'b0').closest('[id$="otp_start"],[id$="otp_end"]')
+    || document.getElementById(side==='start'?'fotp_start':'fotp_end');
+  const errMsg = document.getElementById(side==='start'?'sotpErr':'eotpErr');
+
+  if(entered === correct){
+    // Success — flash green then navigate
+    for(let i=0;i<4;i++){
+      const b = document.getElementById(pfx+'b'+i);
+      b.style.background='rgba(0,196,160,.2)';
+      b.style.borderColor='var(--G)';
+      b.style.color='var(--G)';
+    }
+    setTimeout(()=>{
+      otpState[side]=[];
+      renderOTPBoxes(side);
+      goTo(side==='start'?'fcl':'fjob_done');
+    }, 600);
+  } else {
+    // Wrong — shake + show error
+    if(errMsg) errMsg.textContent = '✗ Wrong OTP. Ask customer again.';
+    for(let i=0;i<4;i++){
+      const b = document.getElementById(pfx+'b'+i);
+      b.style.borderColor='var(--red)';
+      b.style.color='var(--red)';
+    }
+    setTimeout(()=>{
+      otpState[side]=[];
+      renderOTPBoxes(side);
+    }, 900);
+  }
+}
+
+// ===== MIS VIEW TOGGLE =====
+function switchMisView(v){
+  document.getElementById('misStats').style.display = v===0?'block':'none';
+  document.getElementById('misCal').style.display   = v===1?'flex':'none';
+  document.getElementById('vt0').style.background = v===0?'var(--T)':'transparent';
+  document.getElementById('vt0').style.color = v===0?'#071A1F':'var(--txt3)';
+  document.getElementById('vt1').style.background = v===1?'var(--T)':'transparent';
+  document.getElementById('vt1').style.color = v===1?'#071A1F':'var(--txt3)';
+  if(v===1) renderCalendar();
+}
+
+// ===== CALENDAR =====
+// Mock job data: key = "YYYY-M-D"
+const calJobs = {};
+(function seedJobs(){
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  // Seed current month with random jobs
+  const statuses = ['completed','completed','completed','upcoming','cancelled'];
+  const names = ['Ramesh Sappa','Priya Sharma','Anil Reddy','Kavitha Nair','Suresh Babu','Meena Rao'];
+  const tanks = ['Overhead 500L','Underground 1000L','Overhead 2000L','Syntax 500L','Overhead 1000L'];
+  const times = ['7–9 AM','9–11 AM','11–1 PM','1–3 PM','3–5 PM'];
+  for(let d=1; d<=28; d++){
+    if(Math.random()>.45){
+      const key = `${y}-${m}-${d}`;
+      const cnt = Math.random()>.6 ? 2 : 1;
+      calJobs[key] = [];
+      for(let j=0;j<cnt;j++){
+        const st = statuses[Math.floor(Math.random()*statuses.length)];
+        // upcoming only for future dates
+        const date = new Date(y,m,d);
+        const status = date > now ? (Math.random()>.3?'upcoming':'cancelled') : (Math.random()>.15?'completed':'cancelled');
+        calJobs[key].push({
+          id:`OZW-${2025+Math.floor(d/10)}-00${30+d+j}`,
+          name: names[Math.floor(Math.random()*names.length)],
+          tank: tanks[Math.floor(Math.random()*tanks.length)],
+          time: times[Math.floor(Math.random()*times.length)],
+          status,
+          amt: [799,999,1299,1499][Math.floor(Math.random()*4)]
+        });
+      }
+    }
+  }
+  // Always have today
+  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  calJobs[todayKey] = [
+    {id:'OZW-2025-0042',name:'Ramesh Sappa',tank:'Overhead 1000L',time:'9–11 AM',status:'completed',amt:1297},
+    {id:'OZW-2025-0044',name:'Anil Reddy',tank:'Sump 2000L',time:'1–3 PM',status:'upcoming',amt:1299}
+  ];
+})();
+
+let calYear, calMonth, calSelectedDate, calFilter=0;
+function initCal(){
+  const now=new Date();
+  calYear=now.getFullYear(); calMonth=now.getMonth();
+  calSelectedDate=`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+}
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+function renderCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent = months[calMonth]+' '+calYear;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML='';
+  const firstDay = new Date(calYear,calMonth,1).getDay();
+  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
+  const today = new Date();
+  // Empty cells
+  for(let i=0;i<firstDay;i++){
+    const el=document.createElement('div');el.className='cal-day empty';grid.appendChild(el);
+  }
+  for(let d=1;d<=daysInMonth;d++){
+    const key=`${calYear}-${calMonth}-${d}`;
+    const jobs=calJobs[key]||[];
+    const isToday=calYear===today.getFullYear()&&calMonth===today.getMonth()&&d===today.getDate();
+    const isSel=key===calSelectedDate;
+    const el=document.createElement('div');
+    el.className='cal-day'+(isToday?' today':'')+(isSel?' selected':'');
+    // Dot colors based on job statuses
+    const dotHTML=jobs.length?`<div class="dot-row">${jobs.map(j=>`<div class="dot" style="background:${j.status==='completed'?'var(--G)':j.status==='upcoming'?'var(--T)':'var(--red)'}"></div>`).join('')}</div>`:'<div style="height:6px;"></div>';
+    el.innerHTML=`<div class="dn">${d}</div>${dotHTML}`;
+    el.onclick=()=>{calSelectedDate=key;renderCalendar();renderCalJobs();};
+    grid.appendChild(el);
+  }
+  renderCalJobs();
+}
+function selStatusFilter(i){
+  calFilter=i;
+  ['sf0','sf1','sf2','sf3'].forEach((id,j)=>{
+    const el=document.getElementById(id);
+    if(j===i){el.style.background='var(--T)';el.style.color='#071A1F';el.style.border='none';}
+    else{el.style.background='var(--s2)';el.style.color='var(--txt2)';el.style.border='1px solid var(--e1)';}
+  });
+  renderCalJobs();
+}
+function renderCalJobs(){
+  const container=document.getElementById('calJobsList');
+  const jobs=(calJobs[calSelectedDate]||[]).filter(j=>{
+    if(calFilter===0)return true;
+    if(calFilter===1)return j.status==='completed';
+    if(calFilter===2)return j.status==='upcoming';
+    if(calFilter===3)return j.status==='cancelled';
+  });
+  const [cy,cm,cd]=calSelectedDate.split('-').map(Number);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dateLabel=`${cd} ${months[cm]} ${cy}`;
+  if(!jobs.length){
+    container.innerHTML=`<div style="text-align:center;padding:28px 0;"><div style="font-size:36px;margin-bottom:8px;">📅</div><div style="font-size:14px;color:var(--txt3);">No jobs for ${dateLabel}</div></div>`;
+    return;
+  }
+  container.innerHTML=`<div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1px;padding:6px 0 8px;">${dateLabel} — ${jobs.length} job${jobs.length>1?'s':''}</div>`
+    +jobs.map(j=>{
+      const sc={completed:'rgba(45,179,74,.12)',upcoming:'rgba(0,196,160,.1)',cancelled:'rgba(239,68,68,.1)'};
+      const bc={completed:'rgba(45,179,74,.3)',upcoming:'rgba(0,196,160,.25)',cancelled:'rgba(239,68,68,.25)'};
+      const tc={completed:'var(--G)',upcoming:'var(--T)',cancelled:'var(--red)'};
+      const lbl={completed:'✅ Completed',upcoming:'🕐 Upcoming',cancelled:'❌ Cancelled'};
+      return `<div style="background:var(--s1);border-radius:16px;border:1px solid var(--e1);padding:14px;margin-bottom:10px;border-left:3px solid ${tc[j.status]};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span class="mono" style="font-size:11px;color:var(--txt3);">#${j.id}</span>
+          <span style="font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:${sc[j.status]};border:1px solid ${bc[j.status]};color:${tc[j.status]};">${lbl[j.status]}</span>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:var(--txt);margin-bottom:3px;">${j.name}</div>
+        <div style="font-size:12px;color:var(--txt3);">${j.tank} · ${j.time} · <span class="mono" style="color:var(--T);">₹${j.amt.toLocaleString('en-IN')}</span></div>
+      </div>`;
+    }).join('');
+}
+
+// ===== TRANSFER JOB =====
+let tReason=0, tAgent=-1;
+function selReason(i){
+  tReason=i;
+  [0,1,2,3,4].forEach(j=>document.getElementById('tr'+j).className='t-reason'+(j===i?' sel':''));
+  checkTransferReady();
+}
+function selAgent(i){
+  tAgent=i;
+  [0,1,2,3].forEach(j=>{
+    const c=document.getElementById('ag'+j);
+    const r=document.getElementById('ar'+j);
+    if(j===i){
+      c.className='agent-card sel';
+      r.innerHTML='<div style="width:10px;height:10px;border-radius:5px;background:var(--T);"></div>';
+      r.style.borderColor='var(--T)';
+    } else {
+      c.className='agent-card';
+      r.innerHTML='';
+      r.style.borderColor='var(--txt3)';
+    }
+  });
+  checkTransferReady();
+}
+function checkTransferReady(){
+  const btn=document.getElementById('transferBtn');
+  if(tAgent>=0){btn.style.opacity='1';btn.style.pointerEvents='auto';}
+  else{btn.style.opacity='0.4';btn.style.pointerEvents='none';}
+}
+const agentNames=['Ravi Kumar','Mohan Reddy','Prasad Varma','Santosh Kumar'];
+function confirmTransfer(){
+  const overlay=document.getElementById('transferSuccessOverlay');
+  document.getElementById('transferSuccessMsg').textContent=`Job assigned to ${agentNames[tAgent]}. Push notification sent.`;
+  overlay.style.display='flex';
+  // Reset
+  tAgent=-1; tReason=0;
+  selReason(0);
+  [0,1,2,3].forEach(j=>{document.getElementById('ag'+j).className='agent-card';document.getElementById('ar'+j).innerHTML='';document.getElementById('ar'+j).style.borderColor='var(--txt3)';});
+}
+
+// INIT
+initCal();
+initCustomerOTPs();
+renderBk1();renderBk2();
+
+function showToast(msg) {
+  let t = document.getElementById('preview-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'preview-toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#0F2C35;border:1px solid rgba(0,196,160,.3);color:#E0F7F4;padding:10px 18px;border-radius:12px;font-family:Outfit,sans-serif;font-size:13px;font-weight:600;z-index:9999;transition:all .3s;opacity:0;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2200);
+}
+
+// ═══════════════ ADMIN NAV ═══════════════
+function adminNav(screenId, tabEl) {
+  // hide all screens
+  document.querySelector('.screen.active')?.classList.remove('active');
+  const s = document.getElementById(screenId);
+  if (s) { s.style.display='flex'; s.classList.add('active','slide-in'); setTimeout(()=>s.classList.remove('slide-in'),300); }
+  
+  // update tabs
+  document.querySelectorAll('#tabsAdmin .tab').forEach(t=>t.classList.remove('active'));
+  
+  const tabMap = {
+    'a-dashboard':'Dashboard','a-bookings':'Bookings','a-agents':'Field Agents',
+    'a-support':'Support Chat','a-support-chat':'Support Chat',
+    'a-invoices':'Invoices','a-amc':'AMC','a-onboarding':'Onboarding'
+  };
+  // find matching tab
+  const label = tabMap[screenId];
+  if (label) {
+    document.querySelectorAll('#tabsAdmin .tab').forEach(t=>{
+      if(t.textContent.trim()===label) t.classList.add('active');
+    });
+  }
+  if (tabEl) { document.querySelectorAll('#tabsAdmin .tab').forEach(t=>t.classList.remove('active')); tabEl.classList.add('active'); }
+}
+
+function adminSendReply() {
+  const inp = document.getElementById('adminReplyInput');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  showToast('Reply sent ✓ FCM push sent to customer');
+  inp.value = '';
+}
+
+</script>
+
+    </div><!-- /phone screen area -->
+  </div><!-- /phone bezel -->
+</div><!-- /shell -->
+
+<style>
+.stab{
+  padding:7px 15px;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.03);
+  color:rgba(255,255,255,.4);
+  font-family:'Outfit',sans-serif;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition:all .18s;
+  white-space:nowrap;
+  user-select:none;
+}
+.stab:hover{
+  border-color:rgba(0,196,160,.28);
+  color:rgba(255,255,255,.65);
+}
+.stab.active{
+  background:rgba(0,196,160,.14);
+  border-color:rgba(0,196,160,.38);
+  color:#00C4A0;
+  font-weight:700;
+}
+</style>
+
+<script>
+// ── Shell: role + tab wiring that calls v4's own goTo() ──
+let _shellRole = 'customer';
+
+function shellSetRole(role) {
+  _shellRole = role;
+
+  // v4 internal flag
+  isField = (role === 'agent');
+
+  // button styles
+  const btnC = document.getElementById('btnCustomer');
+  const btnA = document.getElementById('btnAgent');
+  if (role === 'customer') {
+    btnC.style.background = '#00C4A0'; btnC.style.color = '#071A1F';
+    btnA.style.background = 'transparent'; btnA.style.color = 'rgba(255,255,255,.4)';
+  } else {
+    btnA.style.background = '#00C4A0'; btnA.style.color = '#071A1F';
+    btnC.style.background = 'transparent'; btnC.style.color = 'rgba(255,255,255,.4)';
+  }
+
+  // tab groups
+  document.getElementById('tabsCustomer').style.display = role === 'customer' ? 'flex' : 'none';
+  document.getElementById('tabsAgent').style.display = role === 'agent' ? 'flex' : 'none';
+
+  // navigate to first screen
+  const first = role === 'customer' ? 'splash' : 'fjobs';
+  const tabs = role === 'customer'
+    ? document.querySelectorAll('#tabsCustomer .stab')
+    : document.querySelectorAll('#tabsAgent .stab');
+  tabs.forEach(t => t.classList.remove('active'));
+  if (tabs[0]) tabs[0].classList.add('active');
+  goTo(first);
+}
+
+function shellGoTo(screenId, tabEl) {
+  if (_shellRole === 'admin') return; // admin uses adminNav
+  const groupId = _shellRole === 'customer' ? 'tabsCustomer' : 'tabsAgent';
+  document.querySelectorAll('#' + groupId + ' .stab').forEach(t => t.classList.remove('active'));
+  if (tabEl) tabEl.classList.add('active');
+  goTo(screenId);
+}
+</script>
+
+
+<!-- ════════════════════════════════════════════ -->
+<!-- LIVE SUPPORT CHAT OVERLAY                    -->
+<!-- ════════════════════════════════════════════ -->
+<div id="chatOverlay" style="
+  position:fixed;inset:0;z-index:9999;
+  display:none;align-items:flex-end;justify-content:center;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(6px);
+">
+  <!-- Chat panel -->
+  <div id="chatPanel" style="
+    width:390px;
+    max-height:75vh;
+    background:#071A1F;
+    border-radius:28px 28px 0 0;
+    border:1px solid rgba(0,196,160,.15);
+    border-bottom:none;
+    display:flex;flex-direction:column;
+    box-shadow:0 -20px 80px rgba(0,0,0,.8),0 0 0 1px rgba(0,196,160,.06);
+    overflow:hidden;
+    transform:translateY(100%);
+    transition:transform .35s cubic-bezier(0.16,1,0.3,1);
+  ">
+
+    <!-- Header -->
+    <div style="
+      background:linear-gradient(135deg,#0a2830,#0d333c);
+      padding:18px 20px 16px;
+      border-bottom:1px solid rgba(0,196,160,.1);
+      display:flex;align-items:center;gap:14px;
+      flex-shrink:0;
+    ">
+      <div style="position:relative;">
+        <div style="
+          width:44px;height:44px;border-radius:14px;
+          background:linear-gradient(135deg,#00C4A0,#007A64);
+          display:flex;align-items:center;justify-content:center;
+          font-size:22px;
+        ">🛡️</div>
+        <div style="
+          position:absolute;bottom:1px;right:1px;
+          width:11px;height:11px;border-radius:50%;
+          background:#22C55E;border:2px solid #071A1F;
+        "></div>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:15px;font-weight:700;color:#E0F7F4;">OzoneWash Support</div>
+        <div style="font-size:11px;color:#22C55E;font-weight:600;margin-top:2px;">● Online · Replies instantly</div>
+      </div>
+      <div onclick="closeChat()" style="
+        width:34px;height:34px;border-radius:10px;
+        background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;font-size:16px;color:rgba(255,255,255,.5);
+      ">✕</div>
+    </div>
+
+    <!-- Messages area -->
+    <div id="chatMessages" style="
+      flex:1;overflow-y:auto;padding:16px;
+      display:flex;flex-direction:column;gap:10px;
+      scrollbar-width:none;
+      max-height:340px;
+    ">
+
+      <!-- Admin greeting bubble -->
+      <div style="display:flex;gap:10px;align-items:flex-end;">
+        <div style="width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#00C4A0,#007A64);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛡️</div>
+        <div>
+          <div style="font-size:10px;color:#3D7A72;margin-bottom:3px;font-weight:600;">OzoneWash Support · now</div>
+          <div style="background:#0F2C35;border:1px solid rgba(0,196,160,.12);border-radius:14px 14px 14px 2px;padding:11px 14px;max-width:230px;">
+            <div style="font-size:13px;color:#E0F7F4;line-height:1.5;">Hi! 👋 Welcome to OzoneWash Support. How can I help you today?</div>
+          </div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;">
+            <div class="quick-reply" onclick="sendQuickReply('Track my booking')">📍 Track booking</div>
+            <div class="quick-reply" onclick="sendQuickReply('Certificate issue')">🏅 Certificate</div>
+            <div class="quick-reply" onclick="sendQuickReply('Reschedule service')">📅 Reschedule</div>
+            <div class="quick-reply" onclick="sendQuickReply('Complaint')">⚠️ Complaint</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input bar -->
+    <div style="
+      padding:12px 14px 20px;
+      border-top:1px solid rgba(0,196,160,.08);
+      background:#071A1F;
+      flex-shrink:0;
+      display:flex;align-items:center;gap:10px;
+    ">
+      <div style="
+        flex:1;background:#0F2C35;border:1px solid rgba(0,196,160,.15);
+        border-radius:20px;padding:12px 16px;
+        display:flex;align-items:center;gap:10px;
+      ">
+        <input id="chatInput" type="text" placeholder="Type a message..."
+          style="flex:1;background:transparent;border:none;outline:none;
+            font-family:'Outfit',sans-serif;font-size:14px;color:#E0F7F4;"
+          onkeydown="if(event.key==='Enter')sendChat()"
+        />
+        <div onclick="sendChat()" style="
+          width:34px;height:34px;border-radius:12px;
+          background:#00C4A0;flex-shrink:0;
+          display:flex;align-items:center;justify-content:center;
+          cursor:pointer;transition:transform .15s;
+        " onmousedown="this.style.transform='scale(.92)'" onmouseup="this.style.transform='scale(1)'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#071A1F" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.quick-reply{
+  padding:6px 12px;border-radius:20px;
+  background:rgba(0,196,160,.08);border:1px solid rgba(0,196,160,.2);
+  color:#00C4A0;font-size:11px;font-weight:600;
+  font-family:'Outfit',sans-serif;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.quick-reply:hover{background:rgba(0,196,160,.16);}
+.msg-user{
+  display:flex;justify-content:flex-end;
+}
+.msg-user-bubble{
+  background:linear-gradient(135deg,#00C4A0,#007A64);
+  color:#071A1F;font-size:13px;font-weight:600;
+  padding:11px 14px;border-radius:14px 14px 2px 14px;
+  max-width:230px;line-height:1.5;
+  font-family:'Outfit',sans-serif;
+}
+.msg-admin{
+  display:flex;gap:10px;align-items:flex-end;
+}
+.msg-admin-bubble{
+  background:#0F2C35;border:1px solid rgba(0,196,160,.12);
+  color:#E0F7F4;font-size:13px;
+  padding:11px 14px;border-radius:14px 14px 14px 2px;
+  max-width:230px;line-height:1.5;
+  font-family:'Outfit',sans-serif;
+}
+.typing-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#3D7A72;display:inline-block;
+  animation:typingBounce .9s ease-in-out infinite;
+}
+.typing-dot:nth-child(2){animation-delay:.15s;}
+.typing-dot:nth-child(3){animation-delay:.3s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+</style>
+
+<script>
+// ── Chat logic ──
+const ADMIN_REPLIES = {
+  'Track my booking': 'Sure! Your booking #OZW-2025-0042 is currently In Progress. Agent Suresh Kumar is at your location. ETA: ~8 minutes. 📍',
+  'Certificate issue': 'Your hygiene certificate for the last cleaning has been issued. EcoScore: 87 (GOLD). Tap the Certificate tab to download your PDF. 🏅',
+  'Reschedule service': 'No problem! To reschedule, cancel your current booking from the Track screen and create a new one. Need help with that? 📅',
+  'Complaint': 'We're sorry to hear that! Could you describe the issue? Your feedback will be forwarded to our quality team immediately. ⚠️',
+};
+
+const FALLBACK = [
+  'Thanks for reaching out! Our team will respond within 2 minutes. 🙏',
+  'Got it! I'm connecting you to a live agent right now...',
+  'Understood. Let me check that for you. Please hold on for a moment.',
+  'I've notified the admin team. You'll receive a WhatsApp confirmation shortly. 📱',
+];
+let fallbackIdx = 0;
+
+function openChat(){
+  const overlay = document.getElementById('chatOverlay');
+  const panel   = document.getElementById('chatPanel');
+  overlay.style.display = 'flex';
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{ panel.style.transform = 'translateY(0)'; });
+  });
+}
+
+function closeChat(){
+  const panel = document.getElementById('chatPanel');
+  panel.style.transform = 'translateY(100%)';
+  setTimeout(()=>{ document.getElementById('chatOverlay').style.display = 'none'; }, 350);
+}
+
+// Close on backdrop tap
+document.getElementById('chatOverlay').addEventListener('click', function(e){
+  if(e.target === this) closeChat();
+});
+
+function sendQuickReply(text){
+  // remove quick reply buttons
+  document.querySelectorAll('.quick-reply').forEach(el => el.remove());
+  addUserMsg(text);
+  showTyping(text);
+}
+
+function sendChat(){
+  const inp = document.getElementById('chatInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  inp.value = '';
+  addUserMsg(text);
+  showTyping(text);
+}
+
+function addUserMsg(text){
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg-user';
+  div.innerHTML = '<div class="msg-user-bubble">'+escHtml(text)+'</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping(text){
+  const msgs = document.getElementById('chatMessages');
+  const tid = document.createElement('div');
+  tid.className = 'msg-admin';
+  tid.id = 'typingIndicator';
+  tid.innerHTML = '<div style="width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#00C4A0,#007A64);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛡️</div><div class="msg-admin-bubble" style="padding:12px 16px;"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+  msgs.appendChild(tid);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  const delay = 900 + Math.random()*600;
+  setTimeout(()=>{
+    const existing = document.getElementById('typingIndicator');
+    if(existing) existing.remove();
+    addAdminMsg(ADMIN_REPLIES[text] || FALLBACK[fallbackIdx++ % FALLBACK.length]);
+  }, delay);
+}
+
+function addAdminMsg(text){
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg-admin';
+  div.innerHTML = '<div style="width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#00C4A0,#007A64);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛡️</div><div class="msg-admin-bubble">'+escHtml(text)+'</div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+
+</body>
+</html>
